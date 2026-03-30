@@ -1,0 +1,3171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Domestic Harmony</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#2563EB;--blue-l:#EFF6FF;--blue-m:#BFDBFE;
+  --green:#059669;--green-l:#ECFDF5;--green-m:#A7F3D0;
+  --red:#DC2626;--red-l:#FEF2F2;--red-m:#FECACA;
+  --amber:#D97706;--amber-l:#FFFBEB;
+  --ink:#0F172A;--ink2:#334155;--ink3:#64748B;
+  --line:#E2E8F0;--bg:#F1F5F9;--white:#fff;
+  --r:18px;--sh:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);--sh-lg:0 8px 32px rgba(0,0,0,.14)
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#94A3B8;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:80px 0 40px}
+
+/* ROLE BAR */
+.role-bar{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--ink);border-radius:50px;padding:5px;display:flex;gap:4px;z-index:9999;box-shadow:var(--sh-lg)}
+.rb{padding:8px 22px;border-radius:40px;border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;color:#94A3B8;background:transparent;transition:all .2s}
+.rb.on{background:var(--blue);color:#fff}
+
+/* PHONE */
+.phone{width:393px;background:var(--bg);border-radius:50px;box-shadow:0 40px 80px rgba(0,0,0,.35),inset 0 0 0 1.5px rgba(255,255,255,.1);overflow:hidden;position:relative}
+/* ── REAL PHONE: go full-screen, drop the shell chrome ── */
+@media (max-width:430px){
+  body{padding:0;background:var(--bg);align-items:stretch}
+  .role-bar{top:env(safe-area-inset-top,12px);width:calc(100% - 32px);max-width:360px}
+  .phone{width:100%;border-radius:0;box-shadow:none;flex:1}
+  .notch{display:none}
+  .sc-wrap{height:calc(100vh - 0px);height:calc(100dvh - 0px)}
+  .sc{padding-bottom:env(safe-area-inset-bottom,0)}
+  .bnav{padding-bottom:env(safe-area-inset-bottom,8px)}
+}
+.notch{height:48px;background:#000;display:flex;align-items:center;justify-content:center}
+.notch-pill{width:126px;height:36px;background:#111;border-radius:20px}
+.sc-wrap{position:relative;height:812px;overflow:hidden}@media(max-width:430px){.sc-wrap{height:100vh;height:100dvh}}
+
+/* SCREENS */
+.sc{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;background:var(--bg);scrollbar-width:none}
+.sc::-webkit-scrollbar{display:none}
+.sc.on{display:block}
+
+/* TOP BAR */
+.tbar{background:var(--white);padding:14px 20px 12px;position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line)}
+.tbar-eye{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.9px;margin-bottom:3px}
+.tbar-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tbar-title{font-size:21px;font-weight:800;color:var(--ink);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:38px;height:38px;border-radius:50%;background:var(--bg);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
+
+/* BOTTOM NAV */
+.bnav{position:sticky;bottom:0;background:var(--white);border-top:1.5px solid var(--line);display:flex;z-index:50}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 12px;gap:3px;border:none;background:none;cursor:pointer;transition:opacity .15s}
+.ni-ic{font-size:20px;line-height:1}
+.ni-lb{font-size:9px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px}
+.ni.on .ni-lb{color:var(--blue)}
+
+/* SECTION HEADER */
+.sh{font-size:11px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;padding:14px 20px 8px;display:flex;align-items:center;gap:8px}
+
+/* GENERIC CARD */
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);margin:0 16px 12px;overflow:hidden}
+.cp{padding:16px}
+
+/* CHIPS */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.cb{background:var(--blue-l);color:var(--blue)}
+.cg{background:var(--green-l);color:var(--green)}
+.cr{background:var(--red-l);color:var(--red)}
+.ca{background:var(--amber-l);color:var(--amber)}
+
+/* ─── FDW TASK TILES ─── */
+.ttile{margin:0 16px 10px;border-radius:20px;cursor:pointer;transition:transform .15s;overflow:hidden}
+.ttile:active{transform:scale(.98)}
+.ttile-inner{display:flex;align-items:center;gap:14px;padding:16px 16px}
+.ttile.t-pending{background:var(--white);box-shadow:var(--sh)}
+.ttile.t-done{background:linear-gradient(135deg,#059669,#10B981)}
+.ttile.t-urgent{background:var(--white);box-shadow:var(--sh);border:2.5px solid var(--red-m)}
+.tile-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.ic-b{background:var(--blue-l)}.ic-g{background:var(--green-l)}.ic-a{background:var(--amber-l)}.ic-r{background:var(--red-l)}.ic-w{background:rgba(255,255,255,.25)}
+.tile-body{flex:1;min-width:0}
+.tile-name{font-size:16px;font-weight:700;color:var(--ink)}
+.tile-name.w{color:#fff}
+.tile-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+.tile-sub.w{color:rgba(255,255,255,.75)}
+.tile-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;margin-top:6px;text-transform:uppercase;letter-spacing:.3px}
+.tb-r{background:var(--red-l);color:var(--red)}.tb-g{background:var(--green-l);color:var(--green)}.tb-b{background:var(--blue-l);color:var(--blue)}.tb-w{background:rgba(255,255,255,.3);color:#fff}
+
+/* ─── DETAIL / TASK DETAIL ─── */
+.det-head{background:var(--white);padding:16px 20px}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--blue);cursor:pointer;border:none;background:none;margin-bottom:12px;padding:0}
+.det-cat{display:inline-flex;align-items:center;gap:6px;background:var(--blue-l);color:var(--blue);font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.det-title{font-size:26px;font-weight:800;color:var(--ink);line-height:1.2;margin-bottom:6px}
+.det-desc{font-size:14px;color:var(--ink3);line-height:1.6}
+
+/* SUPPLIES */
+.sup-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.sup-item{background:var(--white);border-radius:14px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;box-shadow:var(--sh)}
+.sup-em{font-size:24px}
+.sup-lb{font-size:10px;font-weight:700;color:var(--ink3);text-align:center;line-height:1.2}
+
+/* PET PEEVE SECTION HEADER */
+.pp-sec-row{display:flex;align-items:flex-start;justify-content:space-between;padding:4px 16px 10px}
+.pp-sec-title{font-size:17px;font-weight:800;color:var(--ink)}
+.pp-sec-sub{font-size:12px;color:var(--ink3);font-style:italic;margin-top:2px}
+.pp-badge-red{background:var(--red-l);color:var(--red);font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;margin-top:2px}
+
+/* FDW PET PEEVE CARD */
+.pp-card{margin:0 16px 12px;border-radius:20px;overflow:hidden;background:var(--white);box-shadow:var(--sh)}
+.pp-img{width:100%;min-height:120px;display:flex;align-items:center;justify-content:center;font-size:60px;position:relative}
+.pp-x-badge{position:absolute;top:10px;right:10px;width:32px;height:32px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:800;pointer-events:none}
+.pp-body{padding:14px 16px 16px}
+.pp-title{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.pp-note{font-size:13px;color:var(--ink3);line-height:1.5;margin-bottom:14px}
+.pp-actions{display:flex;gap:8px;align-items:center}
+.pp-confirm-btn{flex:1;display:flex;align-items:center;gap:8px;cursor:pointer;padding:11px 14px;border-radius:12px;border:2px solid var(--line);background:none;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink3);transition:all .2s}
+.pp-confirm-btn.done{border-color:var(--green);background:var(--green-l);color:var(--green)}
+.pp-chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:12px}
+.pp-chk.done{background:var(--green);border-color:var(--green);color:#fff}
+.upload-lbl{display:flex;align-items:center;gap:6px;padding:11px 14px;border-radius:12px;background:var(--blue-l);color:var(--blue);font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;white-space:nowrap}
+.pp-proof-box{margin-top:10px;display:none}
+.pp-proof-img{width:100%;max-height:240px;object-fit:contain;border-radius:10px;border:2px solid var(--green);background:#000;cursor:pointer}
+.pp-proof-lbl{font-size:11px;font-weight:700;color:var(--green);margin-top:4px}
+
+/* VERIFY & COMPLETE */
+.verify-bar{margin:0 16px 10px;background:var(--white);border-radius:14px;padding:14px 16px;box-shadow:var(--sh);display:flex;align-items:center;justify-content:space-between}
+.verify-lbl{font-size:11px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px}
+.verify-ct{font-size:14px;font-weight:800}
+.vc-inc{color:var(--red)}.vc-comp{color:var(--green)}
+.cta{margin:0 16px 8px;width:calc(100% - 32px);padding:17px;border-radius:16px;border:none;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .3s}
+.cta.off{background:var(--line);color:var(--ink3);cursor:not-allowed}
+.cta.go{background:var(--blue);color:#fff;box-shadow:0 4px 20px rgba(37,99,235,.35)}
+.cta.done-green{background:var(--green);color:#fff;box-shadow:0 4px 20px rgba(5,150,105,.3)}
+.cta-foot{text-align:center;font-size:12px;padding:0 20px 20px;color:var(--ink3)}
+
+/* NOTES */
+.notes-box{margin:0 16px 12px;background:var(--white);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.notes-hd{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:10px}
+textarea.notes-ta{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;color:var(--ink);resize:none;height:76px;outline:none}
+textarea.notes-ta:focus{border-color:var(--blue)}
+.notes-imgs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.add-photo-lbl{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--ink3);font-family:inherit}
+
+/* PRO TIP */
+.pro-tip{margin:0 16px 12px;background:var(--green-l);border-radius:var(--r);padding:14px 16px;display:flex;gap:10px;border:1px solid var(--green-m)}
+.pt-title{font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
+.pt-text{font-size:13px;color:var(--ink2);line-height:1.5}
+
+/* EMPLOYER TASK CARD (schedule) */
+.etc{background:var(--white);border-radius:var(--r);margin:0 16px 10px;padding:14px 16px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s}
+.etc:active{transform:scale(.98)}
+.etc-info{flex:1}
+.etc-name{font-size:15px;font-weight:700;color:var(--ink)}
+.etc-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+.etc-time{font-size:13px;font-weight:800;color:var(--blue);text-align:right;white-space:nowrap}
+
+/* EMPLOYER TASK LIBRARY CARD */
+.task-lib-card{background:var(--white);border-radius:var(--r);margin:0 16px 0;box-shadow:var(--sh);overflow:hidden}
+.task-lib-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}
+.task-lib-title{font-size:15px;font-weight:800;color:var(--ink);flex:1}
+.task-lib-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+.pp-row{padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+.pp-row-thumb{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden;background:var(--bg);cursor:pointer}
+.pp-row-thumb img{width:100%;height:100%;object-fit:cover}
+.pp-row-info{flex:1;min-width:0}
+.pp-row-name{font-size:14px;font-weight:700;color:var(--ink)}
+.pp-row-note{font-size:12px;color:var(--ink3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-row-btns{display:flex;gap:6px;flex-shrink:0}
+.btn-sm{padding:7px 12px;border-radius:8px;border:none;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.btn-edit{background:var(--blue-l);color:var(--blue)}
+.btn-del{background:var(--red-l);color:var(--red)}
+.add-pp-row{padding:12px 16px;display:flex;align-items:center;justify-content:center}
+.add-pp-btn{width:100%;padding:12px;border-radius:12px;border:2px dashed var(--blue-m);background:var(--blue-l);color:var(--blue);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* WEEKLY PLANNER */
+.wk-prog{background:linear-gradient(135deg,#1E40AF,#3B82F6);border-radius:22px;margin:0 16px 16px;padding:20px;color:#fff}
+.wk-pct{font-size:44px;font-weight:800;line-height:1}
+.wk-lbl{font-size:13px;opacity:.8;margin:2px 0 12px}
+.wk-track{background:rgba(255,255,255,.2);border-radius:100px;height:8px;margin-bottom:10px;overflow:hidden}
+.wk-fill{height:100%;border-radius:100px;background:#34D399;width:65%}
+.wk-rem{font-size:13px;opacity:.9}
+.wk-rem span{color:#6EE7B7;font-weight:800}
+.wk-strip{display:flex;gap:6px;padding:0 16px;overflow-x:auto;scrollbar-width:none}
+.wk-strip::-webkit-scrollbar{display:none}
+.day-chip{flex-shrink:0;width:50px;display:flex;flex-direction:column;align-items:center;padding:10px 0;border-radius:14px;cursor:pointer;background:var(--white);border:1.5px solid var(--line);transition:all .2s;gap:2px}
+.day-chip.on{background:var(--blue);border-color:var(--blue)}
+.day-chip.on .dc-name,.day-chip.on .dc-num{color:#fff}
+.dc-name{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase}
+.dc-num{font-size:20px;font-weight:800;color:var(--ink);line-height:1}
+.dc-dot{width:5px;height:5px;border-radius:50%;background:transparent;margin-top:2px}
+.day-chip.has .dc-dot{background:var(--blue)}
+.day-chip.on.has .dc-dot{background:rgba(255,255,255,.6)}
+.drop-zone{margin:0 16px 10px;border:2px dashed var(--line);border-radius:var(--r);padding:18px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ink3);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.drop-zone:hover,.drop-zone:active{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.pool-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.pool-card{background:var(--white);border-radius:16px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;border:2px solid var(--line);cursor:pointer;transition:all .2s}
+.pool-card:hover,.pool-card:active{border-color:var(--blue);background:var(--blue-l)}
+.pool-card.hi{border-color:var(--green);background:var(--green-l)}
+.pool-card.selected{border-color:var(--blue);background:var(--blue-l);box-shadow:0 0 0 3px rgba(37,99,235,.25);transform:scale(1.02)}
+.drop-zone.ready{border-color:var(--blue);color:var(--blue);background:var(--blue-l);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.3)}50%{box-shadow:0 0 0 6px rgba(37,99,235,0)}}
+
+/* MEALS */
+.meal-strip{display:flex;gap:10px;padding:0 16px;overflow-x:auto;scrollbar-width:none}
+.meal-strip::-webkit-scrollbar{display:none}
+.meal-card{flex-shrink:0;width:138px;border-radius:var(--r);overflow:hidden;background:var(--white);box-shadow:var(--sh);cursor:pointer}
+.meal-img{width:100%;height:86px;display:flex;align-items:center;justify-content:center;font-size:38px}
+.meal-body{padding:10px}
+.meal-day{font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.5px}
+.meal-name{font-size:13px;font-weight:700;color:var(--ink);margin-top:2px;line-height:1.3}
+.meal-time{font-size:11px;color:var(--ink3);margin-top:3px}
+.meal-empty{flex-shrink:0;width:138px;border-radius:var(--r);border:2px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:153px;cursor:pointer;color:var(--ink3);font-size:12px;font-weight:600;transition:all .2s}
+.meal-empty:hover{border-color:var(--blue);color:var(--blue)}
+.ri-area{margin:0 16px 12px;background:var(--white);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.ri-row{display:flex;gap:8px}
+.ri-inp{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px 14px;font-family:inherit;font-size:13px;outline:none;color:var(--ink)}
+.ri-inp:focus{border-color:var(--blue)}
+.ri-fetch{background:var(--blue);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.ri-result{margin-top:12px;display:flex;gap:12px;align-items:center;background:var(--blue-l);border-radius:12px;padding:12px}
+.ri-add{margin-top:8px;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+
+/* GROCERY */
+.gi{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.gi:last-child{border-bottom:none}
+.gi-name{flex:1;font-size:14px;font-weight:600;color:var(--ink)}
+.gi-qty{font-size:12px;color:var(--ink3);margin-right:4px}
+.gtog{display:flex;border-radius:20px;overflow:hidden;border:1.5px solid var(--line)}
+.gb{padding:6px 11px;font-size:11px;font-weight:800;cursor:pointer;border:none;background:transparent;font-family:inherit;transition:all .15s}
+.gb.buy{color:var(--red)}.gb.buy.on{background:var(--red);color:#fff}
+.gb.have{color:var(--green)}.gb.have.on{background:var(--green);color:#fff}
+
+/* ACTIVITY */
+.act-item{display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);align-items:flex-start}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.act-name{font-size:14px;font-weight:700;color:var(--ink)}
+.act-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:4px}
+.see-all{font-size:13px;font-weight:700;color:var(--blue);cursor:pointer;border:none;background:none}
+
+/* INSIGHTS */
+.insights{background:linear-gradient(135deg,#1E40AF,#3B82F6);border-radius:22px;margin:0 16px 16px;padding:20px;color:#fff}
+.ins-title{font-size:16px;font-weight:800;margin-bottom:6px}
+.ins-text{font-size:13px;opacity:.85;line-height:1.5;margin-bottom:14px}
+.ins-btn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+
+/* RINGS */
+.rings-row{display:flex;justify-content:space-around;padding:16px 8px}
+.ring-item{display:flex;flex-direction:column;align-items:center;gap:5px}
+.ring-label{font-size:12px;font-weight:700;color:var(--ink2)}
+
+/* REST CARD */
+.rest-card{margin:0 16px 12px;background:var(--white);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:var(--sh);opacity:.55}
+
+/* MODALS */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-bg.on{opacity:1;pointer-events:all}
+.modal-sheet{background:var(--white);border-radius:28px 28px 0 0;padding:20px 20px 28px;width:100%;transform:translateY(100%);transition:transform .3s;max-height:88%;overflow-y:auto}
+.modal-bg.on .modal-sheet{transform:translateY(0)}
+.modal-title{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:16px}
+.modal-lbl{font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:6px;margin-top:4px}
+input.mi{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;margin-bottom:4px}
+input.mi:focus{border-color:var(--blue)}
+select.mi{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;margin-bottom:4px;background:var(--white);appearance:none}
+textarea.mi{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:14px;color:var(--ink);resize:none;height:76px;outline:none;margin-bottom:4px}
+textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
+.img-pick-lbl{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;border:2px dashed var(--blue-m);border-radius:12px;padding:18px;cursor:pointer;background:var(--blue-l);color:var(--blue);font-size:13px;font-weight:700;margin-bottom:8px}
+.img-preview{width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-bottom:8px;display:none;background:#f1f5f9;cursor:pointer}
+.mbtn{width:100%;padding:14px;border-radius:12px;border:none;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;margin-top:6px}
+.mbtn-p{background:var(--blue);color:#fff}
+.mbtn-s{background:var(--bg);color:var(--ink3)}
+.mbtn-r{background:var(--red-l);color:var(--red)}
+
+/* TOAST */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 22px;border-radius:22px;font-size:13px;font-weight:700;z-index:600;opacity:0;transition:opacity .25s;white-space:nowrap;pointer-events:none;max-width:340px;text-align:center}
+.toast.on{opacity:1}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fadein{animation:fadeIn .25s ease}
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="login-screen" style="position:fixed;inset:0;background:linear-gradient(135deg,#1E40AF,#2563EB);display:flex;align-items:center;justify-content:center;z-index:10000;padding:24px">
+  <div style="background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:48px;margin-bottom:10px">🏠</div>
+      <div style="font-size:22px;font-weight:800;color:#0F172A">Domestic Harmony</div>
+      <div style="font-size:14px;color:#64748B;margin-top:4px">Sign in to continue</div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:6px">Email</label>
+      <input id="login-email" type="email" placeholder="your@email.com" style="width:100%;padding:13px 16px;border:1.5px solid #E2E8F0;border-radius:12px;font-family:inherit;font-size:15px;outline:none;color:#0F172A"/>
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:6px">Password</label>
+      <input id="login-pass" type="password" placeholder="••••••••" style="width:100%;padding:13px 16px;border:1.5px solid #E2E8F0;border-radius:12px;font-family:inherit;font-size:15px;outline:none;color:#0F172A" onkeydown="if(event.key==='Enter')handleLogin()"/>
+    </div>
+    <div id="login-error" style="color:#DC2626;font-size:13px;font-weight:600;margin-bottom:12px;min-height:18px;text-align:center"></div>
+    <button onclick="handleLogin()" style="width:100%;padding:15px;background:#2563EB;color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer">Sign In</button>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:#94A3B8">
+      Employer: employer@domesticharmony.app<br/>Helper: helper@domesticharmony.app
+    </div>
+    <div style="margin-top:16px;border-top:1px solid #E2E8F0;padding-top:14px;text-align:center">
+      <button onclick="devBypass()" style="background:none;border:none;font-family:inherit;font-size:13px;font-weight:600;color:#94A3B8;cursor:pointer;text-decoration:underline">Continue in preview mode (no login)</button>
+    </div>
+  </div>
+</div>
+
+<div class="role-bar" style="display:none">
+  <button class="rb on" data-role="employer" onclick="setRoleUI('employer')">👩‍💼 Employer</button>
+  <button class="rb" data-role="helper" onclick="setRoleUI('helper')">🧹 Helper</button>
+</div>
+
+<div class="phone" style="display:none">
+  <div class="notch"><div class="notch-pill"></div></div>
+  <div class="sc-wrap">
+
+  <!-- ═══════════════════════════════════════
+       EMPLOYER › HOME
+  ═══════════════════════════════════════ -->
+  <div class="sc on" id="e-home">
+    <div class="tbar">
+      <div class="tbar-eye">Friday, Mar 29 · Maria's Progress</div>
+      <div class="tbar-row"><div class="tbar-title">Today Tracker</div><button onclick="signOut()" style="background:none;border:1.5px solid var(--line);border-radius:20px;padding:5px 12px;font-family:inherit;font-size:12px;font-weight:700;color:var(--ink3);cursor:pointer">Sign out</button></div>
+    </div>
+    <div style="height:12px"></div>
+    <div id="employer-notifications"></div>
+    <!-- Overall progress banner -->
+    <div id="tracker-summary-bar" style="margin:0 16px 12px;background:linear-gradient(135deg,#1E40AF,#2563EB);border-radius:20px;padding:18px 20px;color:#fff">
+      <div style="font-size:12px;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Maria · Today's Progress</div>
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:10px">
+        <div style="font-size:48px;font-weight:800;line-height:1" id="tracker-pct">—</div>
+        <div style="font-size:14px;opacity:.85;margin-bottom:6px" id="tracker-fraction">tasks done</div>
+      </div>
+      <div style="background:rgba(255,255,255,.2);border-radius:100px;height:8px;overflow:hidden">
+        <div id="tracker-bar" style="height:100%;border-radius:100px;background:#34D399;width:0%;transition:width .5s"></div>
+      </div>
+    </div>
+    <!-- Per-task status list -->
+    <div class="sh">Task Status</div>
+    <div id="tracker-task-list" style="margin:0 16px 12px;background:var(--white);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden"></div>
+    <div style="height:8px"></div>
+    <nav class="bnav"><button class="ni on" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       EMPLOYER › TASKS
+  ═══════════════════════════════════════ -->
+  <div class="sc" id="e-tasks">
+    <div class="tbar">
+      <div class="tbar-eye">Task Admin</div>
+      <div class="tbar-row">
+        <div class="tbar-title">Manage Tasks</div>
+        <button class="mbtn mbtn-p" style="width:auto;padding:8px 16px;font-size:13px;margin:0;border-radius:20px" onclick="openNewTaskModal()">＋ New Task</button>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div id="task-library-container"></div>
+    <div style="height:16px"></div>
+    <nav class="bnav"><button class="ni" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni on" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       EMPLOYER › SCHEDULE — WEEKLY OVERVIEW
+  ═══════════════════════════════════════ -->
+  <div class="sc" id="e-schedule">
+    <div class="tbar">
+      <div class="tbar-eye">Weekly Schedule</div>
+      <div class="tbar-row">
+        <div class="tbar-title" id="wk-month-title">March 2026</div>
+        <div style="display:flex;gap:8px">
+          <button class="icon-btn" onclick="shiftWeek(-1)" title="Previous week">‹</button>
+          <button class="icon-btn" onclick="shiftWeek(1)" title="Next week">›</button>
+        </div>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="wk-prog"><div style="display:flex;align-items:flex-end;gap:8px"><div class="wk-pct">65%</div><div class="wk-lbl">Completion Rate</div></div><div class="wk-track"><div class="wk-fill"></div></div><div class="wk-rem">You have <span>12 tasks remaining</span> this week.</div></div>
+    <div class="sh">Week of Mar 23–29 <span style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:none;letter-spacing:0">Tap any day to manage it</span></div>
+    <div id="weekly-overview-grid"></div>
+    <div style="height:16px"></div>
+    <nav class="bnav"><button class="ni" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni on" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       EMPLOYER › SCHEDULE — DAY DETAIL
+  ═══════════════════════════════════════ -->
+  <div class="sc" id="e-day-detail">
+    <div class="tbar">
+      <div class="tbar-eye" id="day-detail-eye">Wednesday, Mar 25</div>
+      <div class="tbar-row">
+        <div>
+          <button class="back-btn" onclick="goTo('e-schedule')" style="margin-bottom:0">← Week View</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="icon-btn" id="day-prev-btn" onclick="shiftDay(-1)">‹</button>
+          <button class="icon-btn" id="day-next-btn" onclick="shiftDay(1)">›</button>
+        </div>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div id="sched-day-label" class="sh">Wednesday, Mar 25 <span class="chip cb" id="sched-task-count">2 tasks</span></div>
+    <div id="sched-day-tasks"></div>
+    <div class="drop-zone" id="sched-drop-zone" onclick="dropZoneTapped()">＋ Tap a pool task below to select it, then tap here to schedule</div>
+    <div class="sh">Task Pool <span class="chip cb" id="pool-count-badge">4 Available</span></div>
+    <div class="pool-grid" id="pool-grid"></div>
+    <div style="height:16px"></div>
+    <nav class="bnav"><button class="ni" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni on" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       EMPLOYER › MEALS — COOKBOOK
+  ═══════════════════════════════════════ -->
+  <div class="sc" id="e-meals">
+    <div class="tbar">
+      <div class="tbar-eye">Meal Schedule</div>
+      <div class="tbar-row">
+        <div class="tbar-title">Cookbook</div>
+        <button onclick="openAddRecipeModal()" style="background:var(--blue);color:#fff;border:none;border-radius:20px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">＋ Add Recipe</button>
+      </div>
+      <!-- Sub-tab bar -->
+      <div style="display:flex;gap:0;margin-top:10px;background:var(--bg);border-radius:12px;padding:3px">
+        <button id="tab-cookbook" onclick="mealTab('cookbook')" style="flex:1;padding:8px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--white);color:var(--blue);box-shadow:var(--sh)">📖 Cookbook</button>
+        <button id="tab-weekplan" onclick="mealTab('weekplan')" style="flex:1;padding:8px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--ink3)">📅 Week Plan</button>
+      </div>
+    </div>
+    <!-- COOKBOOK PANEL -->
+    <div id="panel-cookbook">
+      <div style="height:12px"></div>
+
+      <!-- Import card -->
+      <div style="margin:0 16px 14px;background:var(--white);border-radius:var(--r);padding:16px;box-shadow:var(--sh)">
+        <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px">📥 Import Recipe File</div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:12px;line-height:1.5">Ask Claude to extract a recipe for you, then upload the JSON file here. <span style="color:var(--blue);font-weight:700;cursor:pointer" onclick="showRecipeHelp()">How? ›</span></div>
+        <label style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:2px dashed var(--blue-m);border-radius:12px;background:var(--blue-l);color:var(--blue);font-size:14px;font-weight:700;cursor:pointer">
+          📂 Choose Recipe JSON File
+          <input type="file" accept=".json,application/json" style="display:none" onchange="importRecipeJSON(this)"/>
+        </label>
+        <div id="import-status" style="margin-top:8px;font-size:12px;font-weight:600;min-height:18px;text-align:center"></div>
+      </div>
+
+      <div class="sh">My Cookbook <span class="chip cb" id="cookbook-count-badge">3 recipes</span></div>
+      <div id="cookbook-grid"></div>
+      <div style="height:16px"></div>
+    </div>
+    <!-- WEEK PLAN PANEL -->
+    <div id="panel-weekplan" style="display:none">
+      <div style="height:12px"></div>
+      <div class="sh">Week of Mar 23–27</div>
+      <div id="weekplan-grid"></div>
+      <div style="height:8px"></div>
+      <div class="sh">🧾 Ingredient List <span class="chip cb" id="ingr-count-badge">— items</span></div>
+      <div id="ingr-summary-chips" style="padding:0 16px 10px;display:flex;gap:6px;flex-wrap:wrap"></div>
+      <div class="card" id="ingr-list-card"><div style="padding:16px;font-size:13px;color:var(--ink3)">Assign meals to days to generate the ingredient list.</div></div>
+      <button onclick="releaseWeekPlan()" style="margin:8px 16px 4px;width:calc(100% - 32px);background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:17px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 18px rgba(5,150,105,.3)">✅ Release Plan to Helper</button>
+      <div style="text-align:center;font-size:11px;color:var(--ink3);padding:4px 16px 16px">Helper will be notified and can see the meal plan and ingredient list</div>
+    </div>
+    <nav class="bnav"><button class="ni" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni on" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       EMPLOYER › RECIPE DETAIL
+  ═══════════════════════════════════════ -->
+  <div class="sc" id="e-recipe-detail">
+    <div id="e-recipe-detail-content"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       FDW › TASKS (primary screen)
+  ═══════════════════════════════════════ -->
+  <div class="sc" id="f-schedule">
+    <div class="tbar">
+      <div class="tbar-eye">Friday, Mar 29</div>
+      <div class="tbar-row">
+        <div class="tbar-title">My Tasks</div>
+        <div style="text-align:right">
+          <div style="font-size:22px;font-weight:800;color:var(--blue)" id="fdw-pct-lbl">0%</div>
+          <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.6px">Done Today</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;background:var(--line);border-radius:100px;height:7px;overflow:hidden">
+        <div id="fdw-pbar" style="height:100%;border-radius:100px;background:var(--blue);width:0%;transition:width .5s"></div>
+      </div>
+    </div>
+    <div style="height:10px"></div>
+    <div id="fdw-task-list"></div>
+    <div class="rest-card">
+      <div style="font-size:36px">🌙</div>
+      <div style="font-size:16px;font-weight:800;color:var(--ink)">Evening Rest</div>
+      <div style="font-size:13px;color:var(--ink3);text-align:center">No tasks after 6:00 PM</div>
+    </div>
+    <div style="height:8px"></div>
+    <nav class="bnav">
+      <button class="ni on" onclick="fNav('schedule',this)"><div class="ni-ic">✅</div><div class="ni-lb">Tasks</div></button>
+      <button class="ni" onclick="fNav('grocery',this)"><div class="ni-ic">🛍️</div><div class="ni-lb">Groceries</div></button>
+      <button class="ni" onclick="fNav('profile',this)"><div class="ni-ic">👤</div><div class="ni-lb">Profile</div></button>
+    </nav>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       FDW › TASK DETAIL (dynamic)
+  ═══════════════════════════════════════ -->
+  <div class="sc" id="f-detail">
+    <div id="f-detail-content"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       FDW › GROCERIES
+  ═══════════════════════════════════════ -->
+  <div class="sc" id="f-grocery">
+    <div class="tbar">
+      <div class="tbar-eye">This Week's Meals</div>
+      <div class="tbar-row"><div class="tbar-title">Shopping List</div><div class="icon-btn">🔔</div></div>
+    </div>
+    <div style="height:12px"></div>
+    <div id="fdw-plan-banner"></div>
+    <div id="fdw-meal-chips" style="padding:0 16px;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
+    <div class="card cp" style="background:var(--blue-l);border:1.5px solid var(--blue-m)">
+      <div style="font-size:13px;font-weight:800;color:var(--blue);margin-bottom:4px" id="fdw-ingr-summary-lbl">Loading…</div>
+      <div style="font-size:12px;color:var(--ink3)">Check each item against the fridge. Adjust quantities if needed. Green = have it, red = need to buy.</div>
+    </div>
+    <div class="card" style="margin-top:8px" id="fdw-grocery-list"></div>
+    <div class="card cp" style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <div style="font-size:13px;color:var(--ink3)">Summary</div>
+      <div style="font-size:14px;font-weight:800;color:var(--ink)" id="fdw-gsummary">—</div>
+    </div>
+    <div id="grocery-submitted-banner" style="display:none;margin:12px 16px 0;background:var(--green-l);border:1.5px solid var(--green-m);border-radius:14px;padding:14px 16px;font-size:13px;font-weight:700;color:var(--green)">
+      ✅ List submitted to employer! Return to Tasks to mark the Grocery Check task as complete.
+      <button onclick="fNav('schedule',null)" style="display:block;margin-top:8px;background:var(--green);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">← Back to Tasks</button>
+    </div>
+    <button class="cta go" style="margin-top:12px" id="grocery-submit-btn" onclick="submitGrocery()">✉️ Submit List to Employer</button>
+
+    <div style="height:16px"></div>
+    <nav class="bnav">
+      <button class="ni" onclick="fNav('schedule',this)"><div class="ni-ic">✅</div><div class="ni-lb">Tasks</div></button>
+      <button class="ni on" onclick="fNav('grocery',this)"><div class="ni-ic">🛍️</div><div class="ni-lb">Groceries</div></button>
+      <button class="ni" onclick="fNav('profile',this)"><div class="ni-ic">👤</div><div class="ni-lb">Profile</div></button>
+    </nav>
+  </div>
+
+<!-- f-home removed: tasks is now the primary FDW screen -->
+
+  <!-- ═══════════════════════════════════════
+       FDW › PROFILE
+  ═══════════════════════════════════════ -->
+  <div class="sc" id="f-profile">
+    <div class="tbar"><div class="tbar-eye">Account</div><div class="tbar-row"><div class="tbar-title">My Profile</div><div class="icon-btn">⚙️</div></div></div>
+    <div style="height:20px"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:24px"><div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 4px 20px rgba(37,99,235,.3)">👩</div><div style="font-size:20px;font-weight:800;color:var(--ink)">Maria Santos</div><div style="font-size:13px;color:var(--ink3)">Helper · Tan Household</div><span class="chip cg">✓ Active</span></div>
+    <div class="card"><div class="act-item" onclick="toast('Language: Filipino')"><div class="act-dot" style="background:#EFF6FF">🌏</div><div><div class="act-name">Language</div><div class="act-sub">Filipino</div></div><div style="font-size:20px;color:var(--line);margin-left:auto">›</div></div><div class="act-item" onclick="toast('Rest day: Sunday')"><div class="act-dot" style="background:var(--green-l)">📅</div><div><div class="act-name">Rest Day</div><div class="act-sub">Sunday</div></div><div style="font-size:20px;color:var(--line);margin-left:auto">›</div></div></div>
+    <div class="card cp" style="background:var(--green-l);border:1.5px solid var(--green-m)"><div style="font-size:14px;font-weight:800;color:var(--green);margin-bottom:10px">This Week</div><div style="display:flex;gap:16px"><div style="text-align:center"><div style="font-size:24px;font-weight:800;color:var(--ink)">17</div><div style="font-size:11px;color:var(--ink3)">Tasks Done</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:800;color:var(--ink)">85%</div><div style="font-size:11px;color:var(--ink3)">On Time</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:800;color:var(--ink)">100%</div><div style="font-size:11px;color:var(--ink3)">Pet Peeves</div></div></div></div>
+    <div style="height:16px"></div>
+    <nav class="bnav">
+      <button class="ni" onclick="fNav('schedule',this)"><div class="ni-ic">✅</div><div class="ni-lb">Tasks</div></button>
+      <button class="ni" onclick="fNav('grocery',this)"><div class="ni-ic">🛍️</div><div class="ni-lb">Groceries</div></button>
+      <button class="ni on" onclick="fNav('profile',this)"><div class="ni-ic">👤</div><div class="ni-lb">Profile</div></button>
+    </nav>
+  </div>
+
+  </div><!-- sc-wrap -->
+</div><!-- phone -->
+
+<!-- ═══════════════════════════════════════
+       MODALS
+  ═══════════════════════════════════════ -->
+
+  <!-- Rest Day -->
+  <div class="modal-bg" id="restModal" onclick="closeModal('restModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-title">🚫 Rest Day — Sunday</div>
+      <p style="font-size:14px;color:var(--ink3);line-height:1.6;margin-bottom:20px">Sunday is Maria's designated rest day under MOM regulations. Tasks cannot be scheduled on this day.</p>
+      <button class="mbtn mbtn-p" onclick="closeModal('restModal')">Got It</button>
+    </div>
+  </div>
+
+  <!-- New Task Modal -->
+  <div class="modal-bg" id="newTaskModal" onclick="closeModal('newTaskModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-title">＋ New Task</div>
+      <div class="modal-lbl">Task Name</div>
+      <input class="mi" id="nt-name" placeholder="e.g. Mop All Floors"/>
+      <div class="modal-lbl">Category</div>
+      <select class="mi" id="nt-cat">
+        <option value="Cleaning">🧹 Cleaning</option>
+        <option value="Cooking">🍳 Cooking</option>
+        <option value="Child Care">👶 Child Care</option>
+        <option value="Other">📦 Other</option>
+      </select>
+      <div class="modal-lbl">Emoji Icon</div>
+      <input class="mi" id="nt-emoji" placeholder="e.g. 🧹" maxlength="4"/>
+      <div class="modal-lbl">Description (shown to helper)</div>
+      <textarea class="mi" id="nt-desc" placeholder="What exactly should be done?"></textarea>
+      <div class="modal-lbl">Estimated Duration</div>
+      <select class="mi" id="nt-dur">
+        <option>15 min</option><option>30 min</option><option selected>45 min</option><option>1 hr</option><option>1.5 hrs</option><option>2 hrs</option>
+      </select>
+      <div class="modal-lbl">Recurrence <span style="font-weight:500;color:var(--ink3)">(optional)</span></div>
+      <select class="mi" id="nt-recur" onchange="toggleDayField(this.value)">
+        <option value="none" selected>No recurrence (one-off)</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="biweekly">Every 2 weeks</option>
+        <option value="monthly">Monthly</option>
+        <option value="quarterly">Quarterly</option>
+      </select>
+      <div id="nt-day-row" style="display:none">
+        <div class="modal-lbl">Day of week</div>
+        <select class="mi" id="nt-day">
+          <option value="Mon" selected>Monday</option>
+          <option value="Tue">Tuesday</option>
+          <option value="Wed">Wednesday</option>
+          <option value="Thu">Thursday</option>
+          <option value="Fri">Friday</option>
+          <option value="Sat">Saturday</option>
+        </select>
+      </div>
+      <button class="mbtn mbtn-p" onclick="saveNewTask()">Create Task</button>
+      <button class="mbtn mbtn-s" onclick="closeModal('newTaskModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Add / Edit Pet Peeve Modal -->
+  <div class="modal-bg" id="ppModal" onclick="closeModal('ppModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-title" id="pp-modal-title">Add Pet Peeve</div>
+      <div class="modal-lbl">Title</div>
+      <input class="mi" id="pp-inp-title" placeholder="e.g. Hair in the Drain"/>
+      <div class="modal-lbl">Instruction to helper</div>
+      <textarea class="mi" id="pp-inp-note" placeholder="What exactly should they check or do?"></textarea>
+      <div class="modal-lbl">Problem photo <span style="font-weight:500">(shows the issue to avoid)</span></div>
+      <label class="img-pick-lbl" id="pp-img-pick-lbl">
+        📷 Tap to add a "problem state" photo
+        <input type="file" accept="image/*" style="display:none" onchange="previewPPImg(this)"/>
+      </label>
+      <img id="pp-modal-preview" class="img-preview" alt="preview" onclick="if(this.src)expandEvidencePhoto(this.src)"/>
+      <div class="modal-lbl">Pro Tip <span style="font-weight:500">(optional hint for helper)</span></div>
+      <input class="mi" id="pp-inp-tip" placeholder="e.g. Use lemon spray for final finish"/>
+      <button class="mbtn mbtn-p" onclick="savePetPeeve()">Save Pet Peeve</button>
+      <button class="mbtn mbtn-s" onclick="closeModal('ppModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Delete Task Confirm Modal -->
+  <div class="modal-bg" id="deleteTaskModal" onclick="closeModal('deleteTaskModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-title">🗑 Delete Task?</div>
+      <p style="font-size:14px;color:var(--ink3);line-height:1.6;margin-bottom:20px">Delete "<strong id="del-task-name"></strong>"? This will also remove all its pet peeves. This cannot be undone.</p>
+      <button class="mbtn mbtn-r" onclick="confirmDeleteTask()">Yes, Delete Task</button>
+      <button class="mbtn mbtn-s" style="margin-top:8px" onclick="closeModal('deleteTaskModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Time Picker Modal -->
+  <div class="modal-bg" id="timePickerModal" onclick="closeModal('timePickerModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-title">🕐 Pick a Time</div>
+      <div style="font-size:14px;color:var(--ink3);margin-bottom:16px">Scheduling <strong id="time-modal-task-name"></strong> on <strong id="time-modal-day"></strong></div>
+      <div class="modal-lbl">Start Time</div>
+      <input class="mi" type="time" id="sched-time-input" value="09:00"/>
+      <button class="mbtn mbtn-p" style="margin-top:12px" onclick="confirmSchedule()">Add to Schedule ✓</button>
+      <button class="mbtn mbtn-s" onclick="closeModal('timePickerModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Pax Picker Modal -->
+  <div class="modal-bg" id="paxModal" onclick="closeModal('paxModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-title">👨‍👩‍👧‍👦 How many people?</div>
+      <div style="font-size:14px;color:var(--ink3);margin-bottom:6px" id="pax-recipe-name"></div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:16px">Base recipe serves <strong id="pax-base"></strong>. Set how many you want to cook for — ingredients will be scaled automatically.</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:20px">
+        <button onclick="changePax(-1)" style="width:48px;height:48px;border-radius:50%;background:var(--bg);border:2px solid var(--line);font-size:24px;font-weight:700;cursor:pointer;color:var(--ink)">−</button>
+        <div style="text-align:center">
+          <div style="font-size:48px;font-weight:800;color:var(--blue);line-height:1" id="pax-count">4</div>
+          <div style="font-size:13px;color:var(--ink3);margin-top:4px">people</div>
+        </div>
+        <button onclick="changePax(1)" style="width:48px;height:48px;border-radius:50%;background:var(--bg);border:2px solid var(--line);font-size:24px;font-weight:700;cursor:pointer;color:var(--ink)">＋</button>
+      </div>
+      <!-- Recipe picker shown when opening from empty day slot -->
+      <div id="pax-recipe-picker" style="display:none;background:var(--bg);border-radius:12px;padding:4px 8px;margin-bottom:12px;max-height:180px;overflow-y:auto"></div>
+      <!-- Ingredient preview shown after recipe selected -->
+      <div id="pax-scaled-preview" style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--ink3);max-height:150px;overflow-y:auto"></div>
+      <div class="modal-lbl">Assign to day</div>
+      <select class="mi" id="pax-day-select">
+        <option value="Mon">Monday</option>
+        <option value="Tue">Tuesday</option>
+        <option value="Wed">Wednesday</option>
+        <option value="Thu">Thursday</option>
+        <option value="Fri">Friday</option>
+      </select>
+      <button class="mbtn mbtn-p" id="pax-confirm-btn" onclick="confirmAddWithPax()" style="margin-top:12px">Add to Week Plan ✓</button>
+      <button class="mbtn mbtn-s" style="margin-top:8px" onclick="closeModal('paxModal')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Recipe Help Modal -->
+  <div class="modal-bg" id="recipeHelpModal" onclick="closeModal('recipeHelpModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-title">📖 How to add recipes</div>
+      <div style="font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:16px">
+        <p style="margin-bottom:12px"><strong>Step 1:</strong> Open Claude.ai on your phone or computer.</p>
+        <p style="margin-bottom:12px"><strong>Step 2:</strong> Type or paste this message:</p>
+        <div style="background:var(--bg);border-radius:10px;padding:12px;font-size:12px;color:var(--ink3);font-family:monospace;margin-bottom:12px;line-height:1.6">Extract the recipe from this URL and save it as a Domestic Harmony recipe JSON file:<br/>[paste your recipe URL here]</div>
+        <p style="margin-bottom:12px"><strong>Step 3:</strong> Claude will extract the recipe and give you a JSON file to download.</p>
+        <p><strong>Step 4:</strong> Come back here, tap "Choose Recipe JSON File" and select the file you downloaded.</p>
+      </div>
+      <button class="mbtn mbtn-p" onclick="closeModal('recipeHelpModal')">Got it</button>
+    </div>
+  </div>
+
+  <!-- Grocery Approval Modal (Employer) -->
+  <div class="modal-bg" id="groceryApprovalModal" onclick="closeModal('groceryApprovalModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:85%;overflow-y:auto">
+      <div class="modal-title">🛒 Review Shopping List</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:14px">Maria has submitted the ingredient list for this week. Review it below — once approved, share it with your wife to order offline.</div>
+      <div id="approval-list-content"></div>
+      <button class="mbtn mbtn-p" style="margin-top:14px" onclick="approveGroceryList()">✅ Approve List</button>
+      <button class="mbtn mbtn-s" style="margin-top:8px" onclick="closeModal('groceryApprovalModal')">Review Later</button>
+    </div>
+  </div>
+
+  <!-- Task Evidence Modal (Employer view of completed task) -->
+  <div class="modal-bg" id="evidenceModal" onclick="closeModal('evidenceModal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:88%;overflow-y:auto;padding-bottom:8px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">
+        <div id="ev-task-title" style="font-size:18px;font-weight:800;color:var(--ink);flex:1;line-height:1.3"></div>
+        <button onclick="closeModal('evidenceModal')" style="background:none;border:none;font-size:20px;color:var(--ink3);cursor:pointer;flex-shrink:0;margin-left:8px;padding:0">✕</button>
+      </div>
+      <div id="ev-task-meta" style="font-size:12px;color:var(--ink3);margin-bottom:14px"></div>
+      <!-- Pet peeve confirmations with proof photos -->
+      <div id="ev-pp-section"></div>
+      <!-- Completion notes + photos -->
+      <div id="ev-notes-section"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// SUPABASE CLIENT
+// ══════════════════════════════════════════════════
+const SUPABASE_URL = 'https://ctanulcswmlpgacdjakt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_PczdXQsEalOUSLMkFPqK2w_qTlXCDOy';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Current session state
+let currentUser  = null;
+let currentRole  = null; // 'employer' | 'helper'
+
+// ── Auth helpers ──────────────────────────────────
+async function signIn(email, password) {
+  const { data, error } = await _sb.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  currentUser = data.user;
+  currentRole = data.user.user_metadata?.role || 'helper';
+  return currentRole;
+}
+
+async function signOut() {
+  await _sb.auth.signOut();
+  currentUser = null; currentRole = null;
+  showLoginScreen();
+}
+
+// ── Storage helpers ───────────────────────────────
+async function uploadPhoto(bucket, path, dataUrl) {
+  // Convert data URL to blob
+  const res  = await fetch(dataUrl);
+  const blob = await res.blob();
+  const ext  = blob.type.split('/')[1] || 'jpg';
+  const fullPath = path + '.' + ext;
+  const { data, error } = await _sb.storage.from(bucket).upload(fullPath, blob, { upsert: true });
+  if (error) throw error;
+  if (bucket === 'recipe-photos') {
+    const { data: urlData } = _sb.storage.from(bucket).getPublicUrl(fullPath);
+    return urlData.publicUrl;
+  } else {
+    // Private bucket — return path for signed URL later
+    return fullPath;
+  }
+}
+
+async function getSignedUrl(bucket, path) {
+  const { data } = await _sb.storage.from(bucket).createSignedUrl(path, 3600);
+  return data?.signedUrl || '';
+}
+
+// ── DB helpers ────────────────────────────────────
+// Safe wrapper - never throws even if Supabase is offline
+function sbSafe(fn) { try { const p = fn(); if (p && p.catch) p.catch(e => console.warn('DB:', e.message)); } catch(e) { console.warn('DB offline:', e.message); } }
+
+const db = {
+  // Tasks
+  async getTasks()              { const {data} = await _sb.from('tasks').select('*, pet_peeves(*)').order('time_slot'); return data || []; },
+  async updateTask(id, updates) { await _sb.from('tasks').update(updates).eq('id', id); },
+
+  // Pet peeves
+  async updatePP(id, updates)   { await _sb.from('pet_peeves').update(updates).eq('id', id); },
+  async insertPP(pp)            { const {data} = await _sb.from('pet_peeves').insert(pp).select().single(); return data; },
+  async deletePP(id)            { await _sb.from('pet_peeves').delete().eq('id', id); },
+
+  // Cookbook
+  async getCookbook()           { const {data} = await _sb.from('cookbook').select('*').order('name'); return data || []; },
+  async insertRecipe(r)         { const {data} = await _sb.from('cookbook').insert(r).select().single(); return data; },
+  async updateRecipe(id, u)     { await _sb.from('cookbook').update(u).eq('id', id); },
+  async deleteRecipe(id)        { await _sb.from('cookbook').delete().eq('id', id); },
+
+  // Week plan
+  async getWeekPlan(weekStart)  { const {data} = await _sb.from('week_plan').select('*').eq('week_start', weekStart); return data || []; },
+  async upsertWeekPlan(row)     { await _sb.from('week_plan').upsert(row, {onConflict:'week_start,day_key'}); },
+  async deleteWeekPlanDay(weekStart, day) { await _sb.from('week_plan').delete().eq('week_start', weekStart).eq('day_key', day); },
+
+  // Grocery
+  async getGrocery(weekStart)   { const {data} = await _sb.from('grocery_items').select('*').eq('week_start', weekStart); return data || []; },
+  async upsertGroceryItem(item) { await _sb.from('grocery_items').upsert(item, {onConflict:'week_start,item_key'}); },
+  async submitGrocery(weekStart){ await _sb.from('grocery_items').update({submitted:true, submitted_at:new Date().toISOString()}).eq('week_start', weekStart); },
+  async approveGrocery(weekStart){ await _sb.from('grocery_items').update({approved:true, approved_at:new Date().toISOString()}).eq('week_start', weekStart); },
+
+  // Notifications
+  async getNotifications(role)  { const {data} = await _sb.from('notifications').select('*').eq('for_role', role).eq('dismissed', false).order('created_at', {ascending:false}); return data || []; },
+  async addNotification(n)      { await _sb.from('notifications').insert(n); },
+  async dismissNotif(id)        { await _sb.from('notifications').update({dismissed:true}).eq('id', id); },
+};
+
+// ── Realtime subscriptions ───────────────────────
+let realtimeChannel = null;
+function setupRealtime() {
+  if (realtimeChannel) _sb.removeChannel(realtimeChannel);
+  realtimeChannel = _sb.channel('app-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
+      loadTasks().then(() => { renderFdwSchedule(); renderTrackerHome(); renderTaskLibrary(); });
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pet_peeves' }, () => {
+      loadTasks().then(() => { renderFdwSchedule(); renderTrackerHome(); renderTaskLibrary(); });
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'week_plan' }, () => {
+      loadWeekPlan().then(() => { renderWeekPlan(); renderFdwSchedule(); renderFdwGrocery(); });
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'grocery_items' }, () => {
+      loadGrocery().then(() => { renderFdwGrocery(); });
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
+      refreshNotifications();
+    })
+    .subscribe();
+}
+
+async function refreshNotifications() {
+  if (currentRole === 'employer') {
+    notifications.employer = await db.getNotifications('employer');
+    renderEmployerNotifications();
+  } else {
+    notifications.fdw = await db.getNotifications('helper');
+    renderFdwNotifications();
+  }
+}
+
+// ── App data loaders ─────────────────────────────
+async function loadTasks() {
+  const rows = await db.getTasks();
+  // Remap DB rows → in-memory task objects the UI expects
+  tasks = rows.filter(r => r.id !== -1 && !r.is_system).map(r => ({
+    id:          r.id,
+    name:        r.name,
+    emoji:       r.emoji,
+    cat:         r.cat,
+    dur:         r.dur,
+    desc:        r.description,
+    time:        r.time_slot,
+    recur:       r.recur,
+    day:         r.recur_day,
+    supplies:    r.supplies || [],
+    proTip:      r.pro_tip,
+    completed:   r.completed,
+    completedAt: r.completed_at,
+    noteText:    r.note_text,
+    notePhotos:  r.note_photos || [],
+    petPeeves: (r.pet_peeves || []).map(pp => ({
+      id:        pp.id,
+      title:     pp.title,
+      note:      pp.note,
+      emoji:     pp.emoji,
+      bg:        pp.bg,
+      proTip:    pp.pro_tip,
+      proofImg:  pp.proof_url,    // may be a storage path, resolved later
+      confirmed: pp.confirmed,
+    })),
+  }));
+  // Sync grocery system task
+  const sysRow = rows.find(r => r.id === -1);
+  if (sysRow) {
+    grocerySystemTask.completed   = sysRow.completed;
+    grocerySystemTask.completedAt = sysRow.completed_at;
+    grocerySystemTask.noteText    = sysRow.note_text;
+    grocerySystemTask.petPeeves   = (sysRow.pet_peeves || []).map(pp => ({
+      id: pp.id, title: pp.title, note: pp.note,
+      emoji: pp.emoji, bg: pp.bg, proofImg: pp.proof_url, confirmed: pp.confirmed,
+    }));
+  }
+}
+
+async function loadCookbook() {
+  const rows = await db.getCookbook();
+  cookbook = rows.map(r => ({
+    id:           r.id,
+    name:         r.name,
+    emoji:        r.emoji,
+    cat:          r.category,
+    desc:         r.description,
+    url:          r.source_url,
+    sourceCredit: r.source_credit,
+    time:         r.cook_time,
+    servings:     r.base_servings,
+    base_servings:r.base_servings,
+    ingredients:  r.ingredients || [],
+    steps:        r.steps || [],
+    notes:        r.notes || [],
+    heroImg:      r.hero_img_url || null,
+  }));
+}
+
+async function loadWeekPlan() {
+  const rows = await db.getWeekPlan(currentWeekStart());
+  // Reset weekPlan
+  MEAL_DAYS.forEach(d => weekPlan[d] = null);
+  rows.forEach(r => {
+    weekPlan[r.day_key] = {
+      recipeId: r.recipe_id,
+      pax:      r.pax,
+      scaled:   r.scaled_ingredients || null,
+    };
+  });
+  weekPlanReleased = rows.some(r => r.released);
+}
+
+async function loadGrocery() {
+  const rows = await db.getGrocery(currentWeekStart());
+  fdwGroceryState = {};
+  rows.forEach(r => {
+    fdwGroceryState[r.item_key] = {
+      key:         r.item_key,
+      name:        r.name,
+      baseQty:     parseFloat(r.base_qty),
+      adjustedQty: parseFloat(r.adjusted_qty),
+      unit:        r.unit,
+      status:      r.status,
+    };
+    if (r.submitted) grocerySystemTask.grocerySubmitted = true;
+  });
+}
+
+function currentWeekStart() {
+  // Returns the Monday of the current week offset as YYYY-MM-DD
+  const base = new Date(2026, 2, 23); // Mon Mar 23 2026
+  base.setDate(base.getDate() + weekOffset * 7);
+  return base.toISOString().split('T')[0];
+}
+
+// ── Login screen ─────────────────────────────────
+function showLoginScreen() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.querySelector('.role-bar').style.display = 'none';
+  document.querySelector('.phone').style.display = 'none';
+}
+
+function hideLoginScreen() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.querySelector('.role-bar').style.display = 'flex';
+  document.querySelector('.phone').style.display = 'block';
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  try {
+    const role = await signIn(email, pass);
+    hideLoginScreen();
+    await loadAllData();
+    setupRealtime();
+    if (role === 'employer') {
+      setRoleUI('employer');
+    } else {
+      setRoleUI('helper');
+    }
+  } catch(e) {
+    // Show exact error for diagnosis
+    errEl.textContent = 'Error: ' + (e.message || JSON.stringify(e));
+    console.error('Login error:', e);
+  }
+}
+
+async function loadAllData() {
+  await Promise.all([loadTasks(), loadCookbook(), loadWeekPlan(), loadGrocery()]);
+  notifications.employer = await db.getNotifications('employer');
+  notifications.fdw       = await db.getNotifications('helper');
+}
+
+function setRoleUI(role) {
+  // Update role bar highlight
+  document.querySelectorAll('.rb').forEach(b => b.classList.remove('on'));
+  const btn = document.querySelector(`.rb[data-role="${role}"]`);
+  if (btn) btn.classList.add('on');
+  if (role === 'employer') {
+    renderTaskLibrary(); renderWeeklyOverview(); renderTrackerHome();
+    renderEmployerNotifications(); goTo('e-home');
+  } else {
+    renderFdwSchedule(); renderFdwGrocery(); goTo('f-schedule');
+  }
+}
+
+// ══════════════════════════════════════════════════
+// DATA STORE — in-memory state (synced from Supabase)
+// ══════════════════════════════════════════════════
+const CAT_ICONS = {'Cleaning':'🧹','Cooking':'🍳','Child Care':'👶','Other':'📦'};
+const CAT_COLORS = {'Cleaning':'ic-b','Cooking':'ic-g','Child Care':'ic-a','Other':'ic-b'};
+
+// SYSTEM TASK: Grocery Check — always present when week plan released
+// id:-1 = system task, cannot be deleted, employer can edit pet peeves only
+const GROCERY_TASK_ID = -1;
+const grocerySystemTask = {
+  id: GROCERY_TASK_ID,
+  name: 'Grocery List Check',
+  emoji: '🛒',
+  cat: 'Other',
+  dur: '15–20 min',
+  desc: "Check this week's ingredient list against what's in the fridge. Toggle each item (Have / Need to Buy), adjust quantities if needed, then submit to employer for approval.",
+  time: '08:30 AM',
+  system: true,        // cannot be deleted
+  groceryTask: true,   // special behaviour: routes to grocery screen
+  completed: false,
+  grocerySubmitted: false,  // true after FDW submits list
+  petPeeves: [
+    { id:998, title:'Keep all shopping receipts', note:'Do not throw away any receipts — place them on the kitchen counter for Mrs Tan to check.', emoji:'🧾', bg:'#FEF9C3', proofImg:null, confirmed:false }
+  ],
+};
+
+let tasks = [
+  { id: 1, name: 'Breakfast Prep',     emoji:'☕', cat:'Cooking',    dur:'20 min', desc:'Prepare breakfast for the family.', petPeeves:[], completed:true,  time:'07:30 AM', completedAt:'07:30 AM' },
+  { id: 2, name: 'Clean the Shower',   emoji:'🚿', cat:'Cleaning',   dur:'15–20 min', desc:'High-standard deep clean of all glass surfaces, tiles, and fixtures. Ensure all drainage is clear.', supplies:['🧴 Glass Cleaner','🧽 Microfibre Cloth','🪥 Grout Brush','⚗️ Descaler'], proTip:'Use the lemon-scented spray under the sink for the final finish.', petPeeves:[
+      { id:1, title:'Hair in the Drain',      note:'Lift the cover and clear the trap completely. This is my #1 frustration.', emoji:'🕳️', bg:'#FEE2E2', proofImg:null, confirmed:false },
+      { id:2, title:'Water Spots on Glass',   note:'Always squeegee and wipe dry. Water spots make the whole bathroom look uncleaned.', emoji:'💧', bg:'#DBEAFE', proofImg:null, confirmed:false }
+    ], completed:false, time:'09:00 AM' },
+  { id: 3, name: 'Laundry & Folding',  emoji:'👕', cat:'Cleaning',   dur:'1.5 hrs', desc:'Wash, dry, fold and return all laundry to correct rooms.', petPeeves:[], completed:false, time:'01:00 PM' },
+];
+
+let nextTaskId = 10;
+let pendingDeleteTaskId = null;
+let nextPPId = 100;
+let editingPPTaskId = null;   // which task we're adding/editing a PP for
+let editingPPId = null;       // null = new, number = editing existing
+let gState = {1:'buy',2:'have',3:'buy',4:'have',5:'buy',6:'have',7:'buy',8:'buy',9:'have'};
+let toastTmr;
+let pendingPhotoDataUrl = null;
+// Notification state
+const notifications = {
+  employer: [],   // [{id, type, text, cta, ctaFn, timestamp}]
+  fdw:      [],
+};
+let notifId = 1;
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
+function goTo(id) {
+  document.querySelectorAll('.sc').forEach(s => s.classList.remove('on'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('on'); el.scrollTop = 0; }
+}
+
+// setRole moved to setRoleUI in Supabase block above
+
+function eNav(tab, btn) {
+  if (tab === 'tasks')    renderTaskLibrary();
+  if (tab === 'schedule') renderPoolGrid();
+  if (tab === 'schedule') renderWeeklyOverview();
+  if (tab === 'meals')    renderCookbook();
+  if (tab === 'home')     { renderEmployerNotifications(); renderTrackerHome(); }
+  goTo('e-' + tab);
+  syncNavBtns('e-' + tab, btn);
+}
+
+function fNav(tab, btn) {
+  if (tab === 'schedule') renderFdwSchedule();
+  if (tab === 'grocery')  renderFdwGrocery();
+  goTo('f-' + tab);
+  if (btn) syncNavBtns('f-' + tab, btn);
+}
+
+function syncNavBtns(screenId, activeBtn) {
+  const screen = document.getElementById(screenId);
+  if (!screen) return;
+  screen.querySelectorAll('.ni').forEach(n => { n.classList.remove('on'); n.querySelector('.ni-lb').style.color = ''; });
+  if (activeBtn) { activeBtn.classList.add('on'); activeBtn.querySelector('.ni-lb').style.color = 'var(--blue)'; }
+}
+
+// ══════════════════════════════════════════════════
+// RENDER › EMPLOYER TASK LIBRARY
+// ══════════════════════════════════════════════════
+function renderTaskLibrary() {
+  const container = document.getElementById('task-library-container');
+  const cats = ['Cleaning','Cooking','Child Care','Other'];
+  let html = '';
+
+  // Always show the system Grocery Check task at the top (employer can edit PP, cannot delete)
+  const gt = grocerySystemTask;
+  const gtPP = gt.petPeeves.length;
+  html += `<div class="sh">⚙️ System Tasks</div>
+  <div class="task-lib-card">
+    <div class="task-lib-head">
+      <div style="flex:1;min-width:0">
+        <div class="task-lib-title">${gt.emoji} ${gt.name} <span style="font-size:10px;font-weight:700;background:var(--blue-l);color:var(--blue);padding:2px 8px;border-radius:20px;margin-left:6px">System</span></div>
+        <div class="task-lib-sub">Auto-appears when meal plan is released · Cannot be deleted</div>
+      </div>
+      <span class="chip ${gtPP>0?'cr':'cb'}" style="flex-shrink:0">${gtPP>0?'⚠️ '+gtPP+' Pet Peeve'+(gtPP>1?'s':''):'No Pet Peeves'}</span>
+    </div>
+    ${gt.petPeeves.map(pp => `
+      <div class="pp-row" id="pp-row-sys-${pp.id}">
+        <div class="pp-row-thumb" style="background:var(--amber-l)"><span style="font-size:20px">⚠️</span></div>
+        <div class="pp-row-info"><div class="pp-row-name">${pp.title}</div><div class="pp-row-note">${pp.note}</div></div>
+        <div class="pp-row-btns">
+          <button class="btn-sm btn-edit" onclick="openEditPP(${GROCERY_TASK_ID},${pp.id})">Edit</button>
+          <button class="btn-sm btn-del" onclick="deletePP(${GROCERY_TASK_ID},${pp.id})">✕</button>
+        </div>
+      </div>`).join('')}
+    <div class="add-pp-row"><button class="add-pp-btn" onclick="openAddPP(${GROCERY_TASK_ID})">＋ Add Pet Peeve to Grocery Check</button></div>
+  </div>
+  <div style="height:12px"></div>`;
+  cats.forEach(cat => {
+    const catTasks = tasks.filter(t => t.cat === cat);
+    if (!catTasks.length) return;
+    html += `<div class="sh">${CAT_ICONS[cat]} ${cat} <span class="chip cb">${catTasks.length} Task${catTasks.length>1?'s':''}</span></div>`;
+    catTasks.forEach(t => {
+      const ppCount = t.petPeeves ? t.petPeeves.length : 0;
+      html += `
+      <div class="task-lib-card">
+        <div class="task-lib-head">
+          <div style="flex:1;min-width:0">
+            <div class="task-lib-title">${t.emoji||'📋'} ${t.name}</div>
+            <div class="task-lib-sub">${t.cat} · ${t.dur||'—'}${t.recur&&t.recur!=='none'?' · 🔁 '+t.recur+(t.day?' ('+t.day+')':''):''}</div>
+          </div>
+          <span class="chip ${ppCount>0?'cr':'cb'}" style="flex-shrink:0">${ppCount>0?`⚠️ ${ppCount} Pet Peeve${ppCount>1?'s':''}`:'No Pet Peeves'}</span>
+          <button class="btn-sm btn-del" style="flex-shrink:0;margin-left:6px" onclick="deleteTask(${t.id})">🗑</button>
+        </div>
+        ${(t.petPeeves||[]).map(pp => `
+          <div class="pp-row" id="pp-row-${t.id}-${pp.id}">
+            <div class="pp-row-thumb" style="background:${pp.bg||'var(--bg)'}" ${pp.proofImg ? `onclick="expandEvidencePhoto('${pp.proofImg}')" title="Tap to view full photo"` : ''}>
+              ${pp.proofImg ? `<img src="${pp.proofImg}" alt="${pp.title}" style="width:100%;height:100%;object-fit:cover;border-radius:6px"/>` : `<span style="font-size:20px">⚠️</span>`}
+            </div>
+            <div class="pp-row-info">
+              <div class="pp-row-name">${pp.title}</div>
+              <div class="pp-row-note">${pp.note}</div>
+            </div>
+            <div class="pp-row-btns">
+              <button class="btn-sm btn-edit" onclick="openEditPP(${t.id},${pp.id})">Edit</button>
+              <button class="btn-sm btn-del" onclick="deletePP(${t.id},${pp.id})">✕</button>
+            </div>
+          </div>`).join('')}
+        <div class="add-pp-row">
+          <button class="add-pp-btn" onclick="openAddPP(${t.id})">＋ Add Pet Peeve to "${t.name}"</button>
+        </div>
+      </div>
+      <div style="height:12px"></div>`;
+    });
+  });
+  container.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════
+// RENDER › EMPLOYER TODAY TRACKER
+// ══════════════════════════════════════════════════
+function renderTrackerHome() {
+  const allTasks = buildFdwDailyTasks();
+  const total    = allTasks.length;
+  const done     = allTasks.filter(t => t.completed).length;
+  const pct      = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  // Update summary bar
+  const pctEl  = document.getElementById('tracker-pct');
+  const fracEl = document.getElementById('tracker-fraction');
+  const barEl  = document.getElementById('tracker-bar');
+  if (pctEl)  pctEl.textContent  = pct + '%';
+  if (fracEl) fracEl.textContent = done + ' / ' + total + ' tasks done';
+  if (barEl)  barEl.style.width  = pct + '%';
+
+  // Render per-task status rows
+  const listEl = document.getElementById('tracker-task-list');
+  if (!listEl) return;
+
+  if (!allTasks.length) {
+    listEl.innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--ink3)">No tasks assigned to Maria today.</div>';
+    return;
+  }
+
+  listEl.innerHTML = allTasks.map((t, i) => {
+    const isLast   = i === allTasks.length - 1;
+    const isDone   = t.completed;
+    const ppCount  = (t.petPeeves||[]).length;
+    const ppDone   = (t.petPeeves||[]).filter(p => p.confirmed).length;
+
+    const statusDot = isDone
+      ? `<div style="width:32px;height:32px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0">✓</div>`
+      : `<div style="width:32px;height:32px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${t.emoji}</div>`;
+
+    const statusText = isDone
+      ? `<span style="color:var(--green);font-weight:700">Done${t.completedAt ? ' · ' + t.completedAt : ''}</span>`
+      : ppCount > 0
+        ? `<span style="color:var(--amber);font-weight:700">In progress · ${ppDone}/${ppCount} priorities</span>`
+        : `<span style="color:var(--ink3)">Pending · ${t.time||''}</span>`;
+
+    const taskId = t.id ?? (t._type === 'grocery' ? GROCERY_TASK_ID : null);
+    const clickable = isDone && taskId !== null;
+    return `<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:${isLast?'none':'1px solid var(--line)'};cursor:${clickable?'pointer':'default'};${clickable?'background:var(--white);':''}transition:background .15s"
+      ${clickable ? `onclick="openEvidenceModal(${taskId})"` : ''}
+      onmouseenter="${clickable?`this.style.background='var(--bg)'`:'undefined'}"
+      onmouseleave="${clickable?`this.style.background='var(--white)'`:'undefined'}">
+      ${statusDot}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;color:${isDone?'var(--ink3)':'var(--ink)'};text-decoration:${isDone?'line-through':'none'}">${t.name}</div>
+        <div style="font-size:12px;margin-top:2px">${statusText}</div>
+        ${isDone && clickable ? `<div style="font-size:11px;color:var(--blue);font-weight:700;margin-top:3px">Tap to view evidence →</div>` : ''}
+      </div>
+      ${isDone
+        ? `<div style="font-size:18px">✅</div>`
+        : `<div style="font-size:12px;font-weight:700;color:var(--blue);white-space:nowrap">${t.time||''}</div>`}
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// EMPLOYER EVIDENCE VIEWER
+// ══════════════════════════════════════════════════
+function openEvidenceModal(taskId) {
+  const t = taskId === GROCERY_TASK_ID
+    ? grocerySystemTask
+    : tasks.find(x => x.id === taskId);
+  if (!t) return;
+
+  document.getElementById('ev-task-title').textContent = t.emoji + ' ' + t.name;
+  document.getElementById('ev-task-meta').innerHTML =
+    (t.completedAt ? '✅ Completed at ' + t.completedAt : '⏳ Not yet complete') +
+    (t.dur ? ' · ' + t.dur : '') +
+    (t.cat ? ' · ' + t.cat : '');
+
+  // Pet peeve confirmations
+  const pps = t.petPeeves || [];
+  let ppHtml = '';
+  if (pps.length) {
+    ppHtml = `<div style="font-size:12px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Employer Priorities</div>`;
+    ppHtml += pps.map(pp => {
+      const confirmed = pp.confirmed;
+      const hasProof  = !!pp.proofImg;
+      return `<div style="margin-bottom:14px;border-radius:14px;overflow:hidden;border:1.5px solid ${confirmed?'var(--green-m)':'var(--red-m)'}">
+        <div style="padding:10px 14px;background:${confirmed?'var(--green-l)':'var(--red-l)'};display:flex;align-items:center;gap:8px">
+          <div style="font-size:18px">⚠️</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:800;color:var(--ink)">${pp.title}</div>
+            <div style="font-size:11px;color:var(--ink3);margin-top:1px">${pp.note}</div>
+          </div>
+          <div style="font-size:20px">${confirmed ? '✅' : '⭕'}</div>
+        </div>
+        ${hasProof
+          ? `<div style="background:#000;cursor:pointer" onclick="expandEvidencePhoto('${pp.proofImg}')"><img src="${pp.proofImg}" style="width:100%;max-height:260px;object-fit:contain;display:block"/><div style="padding:5px 12px;font-size:11px;font-weight:700;color:#aaa">📷 Tap to view full photo</div></div>`
+          : `<div style="padding:10px 14px;font-size:12px;color:var(--ink3);font-style:italic">${confirmed ? 'Confirmed without photo' : 'Not yet addressed'}</div>`}
+      </div>`;
+    }).join('');
+  } else {
+    ppHtml = `<div style="font-size:13px;color:var(--ink3);margin-bottom:14px">No pet peeves set for this task.</div>`;
+  }
+  document.getElementById('ev-pp-section').innerHTML = ppHtml;
+
+  // Completion notes and photos
+  const notePhotos = t.notePhotos || [];
+  const noteText   = t.noteText   || '';
+  let notesHtml = `<div style="font-size:12px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:4px">Completion Notes</div>`;
+  if (noteText) {
+    notesHtml += `<div style="background:var(--bg);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--ink2);line-height:1.5;margin-bottom:10px">${noteText}</div>`;
+  }
+  if (notePhotos.length) {
+    notesHtml += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">` +
+      notePhotos.map(src =>
+        `<img src="${src}" style="width:88px;height:88px;object-fit:cover;border-radius:12px;border:2px solid var(--line);cursor:pointer" onclick="expandEvidencePhoto('${src}')"/>`
+      ).join('') + `</div>`;
+  }
+  if (!noteText && !notePhotos.length) {
+    notesHtml += `<div style="font-size:13px;color:var(--ink3);font-style:italic">No completion notes or photos submitted.</div>`;
+  }
+  document.getElementById('ev-notes-section').innerHTML = notesHtml;
+
+  openModal('evidenceModal');
+}
+
+function expandEvidencePhoto(src) {
+  // Show photo full-screen in an overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:pointer';
+  overlay.innerHTML = `<img src="${src}" style="max-width:95%;max-height:90vh;object-fit:contain;border-radius:12px"/>`;
+  overlay.onclick = () => document.body.removeChild(overlay);
+  document.body.appendChild(overlay);
+}
+
+// ══════════════════════════════════════════════════
+// RENDER › FDW SCHEDULE
+// ══════════════════════════════════════════════════
+// Build the complete daily task list for FDW:
+// regular tasks + meal tasks from weekPlan + grocery system task (if plan released)
+// Returns array sorted by time
+function buildFdwDailyTasks() {
+  const all = [];
+
+  // 1. Regular tasks from the tasks[] array
+  tasks.forEach(t => all.push({...t, _type:'task'}));
+
+  // 2. Meal tasks auto-generated from weekPlan (today = Wed for prototype)
+  const TODAY_KEY = 'Wed'; // In production this would be today's actual day key
+  const entry = weekPlan[TODAY_KEY];
+  if (entry) {
+    const rId = typeof entry === 'string' ? entry : entry.recipeId;
+    const pax = entry && typeof entry === 'object' ? entry.pax : null;
+    const recipe = cookbook.find(r => r.id === rId);
+    if (recipe) {
+      all.push({
+        id: 'meal_' + rId,
+        name: 'Cook: ' + recipe.name,
+        emoji: recipe.emoji || '🍳',
+        cat: 'Cooking',
+        dur: recipe.time || '—',
+        desc: recipe.desc + (pax ? ' (Cooking for ' + pax + ' people)' : ''),
+        time: '05:00 PM',
+        petPeeves: [],
+        completed: false,
+        _type: 'meal',
+        _recipeId: rId,
+        _pax: pax,
+        _recipe: recipe,
+      });
+    }
+  }
+
+  // 3. Grocery system task — appears when week plan has been released
+  if (weekPlanReleased) {
+    all.push({...grocerySystemTask, _type:'grocery'});
+  }
+
+  // Sort by time (HH:MM AM/PM)
+  const toMins = t => {
+    if (!t.time) return 999;
+    const parts = t.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!parts) return 999;
+    let h = parseInt(parts[1]);
+    const m = parseInt(parts[2]);
+    const ap = parts[3].toUpperCase();
+    if (ap === 'PM' && h !== 12) h += 12;
+    if (ap === 'AM' && h === 12) h = 0;
+    return h * 60 + m;
+  };
+  all.sort((a, b) => toMins(a) - toMins(b));
+  return all;
+}
+
+function renderFdwSchedule() {
+  const container = document.getElementById('fdw-task-list');
+  if (!container) return;
+
+  const allTasks = buildFdwDailyTasks();
+  const total = allTasks.length;
+  const done  = allTasks.filter(t => t.completed).length;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  const pctEl  = document.getElementById('fdw-pct-lbl');
+  const pbarEl = document.getElementById('fdw-pbar');
+  if (pctEl)  pctEl.textContent    = pct + '%';
+  if (pbarEl) pbarEl.style.width   = pct + '%';
+
+  container.innerHTML = allTasks.map(t => renderFdwTile(t)).join('');
+}
+
+function renderFdwTile(t) {
+  const ppCount = (t.petPeeves||[]).length;
+
+  // ── COMPLETED ──
+  if (t.completed) {
+    return `<div class="ttile t-done fadein">
+      <div class="ttile-inner">
+        <div class="tile-icon ic-w">${t.emoji}</div>
+        <div class="tile-body">
+          <div class="tile-name w">${t.name}</div>
+          <div class="tile-sub w">Completed${t.completedAt?' at '+t.completedAt:''}</div>
+          <div class="tile-badge tb-w">✓ Done</div>
+        </div>
+        <div style="width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0">✓</div>
+      </div></div>`;
+  }
+
+  // ── GROCERY SYSTEM TASK ──
+  if (t._type === 'grocery' || t.groceryTask) {
+    const submitted = grocerySystemTask.grocerySubmitted;
+    const cls = ppCount > 0 ? 't-urgent' : 't-pending';
+    const badge = submitted
+      ? `<div class="tile-badge tb-g">✓ List submitted — tap to complete</div>`
+      : `<div class="tile-badge tb-b">Tap to check grocery list →</div>`;
+    return `<div class="ttile ${cls} fadein" onclick="openGroceryTask()">
+      <div class="ttile-inner">
+        <div class="tile-icon ic-g">🛒</div>
+        <div class="tile-body">
+          <div class="tile-name">${t.name}</div>
+          <div class="tile-sub">${t.time} · ${t.dur}</div>
+          ${badge}
+          ${ppCount > 0 ? `<div class="tile-badge tb-r" style="margin-top:4px">⚠️ ${ppCount} Pet Peeve${ppCount>1?'s':''}</div>` : ''}
+        </div>
+        <div style="font-size:22px;color:var(--line)">›</div>
+      </div></div>`;
+  }
+
+  // ── MEAL TASK ──
+  if (t._type === 'meal') {
+    return `<div class="ttile t-pending fadein" onclick="openFdwMealDetail('${t._recipeId}')">
+      <div class="ttile-inner">
+        <div class="tile-icon ic-g">${t.emoji}</div>
+        <div class="tile-body">
+          <div class="tile-name">${t.name}</div>
+          <div class="tile-sub">${t.time} · ${t.dur}${t._pax ? ' · ' + t._pax + ' pax' : ''}</div>
+          <div class="tile-badge tb-b">View Recipe →</div>
+        </div>
+        <div style="font-size:22px;color:var(--line)">›</div>
+      </div></div>`;
+  }
+
+  // ── REGULAR TASK ──
+  const isUrgent = ppCount > 0;
+  const cls = isUrgent ? 't-urgent' : 't-pending';
+  const badge = isUrgent
+    ? `<div class="tile-badge tb-r">⚠️ ${ppCount} Pet Peeve${ppCount>1?'s':''}</div>`
+    : `<div class="tile-badge tb-b">View Details →</div>`;
+  return `<div class="ttile ${cls} fadein" onclick="openFdwDetail(${t.id})">
+    <div class="ttile-inner">
+      <div class="tile-icon ${CAT_COLORS[t.cat]||'ic-b'}">${t.emoji}</div>
+      <div class="tile-body">
+        <div class="tile-name">${t.name}</div>
+        <div class="tile-sub">${t.time||''} · ${t.dur||''}</div>
+        ${badge}
+      </div>
+      <div style="font-size:22px;color:var(--line)">›</div>
+    </div></div>`;
+}
+
+// Opens grocery task — routes to groceries, then back to task detail for completion
+function openGroceryTask() {
+  const submitted = grocerySystemTask.grocerySubmitted;
+  if (submitted) {
+    // List already submitted — open task detail so FDW can mark complete
+    openFdwDetail(GROCERY_TASK_ID);
+  } else {
+    // Route to grocery screen to validate list
+    fNav('grocery', null);
+    // Highlight the submit button
+    setTimeout(() => {
+      const btn = document.querySelector('[onclick="submitGrocery()"]');
+      if (btn) { btn.style.animation = 'pulse 1s 3'; }
+    }, 400);
+  }
+}
+
+// FDW meal task detail — shows recipe instructions
+function openFdwMealDetail(recipeId) {
+  const recipe = cookbook.find(r => r.id === recipeId);
+  if (!recipe) { toast('Recipe not found in cookbook'); return; }
+
+  document.getElementById('f-detail-content').innerHTML = `
+    <div class="det-head">
+      <button class="back-btn" onclick="goTo('f-schedule');renderFdwSchedule()">← Back to Tasks</button>
+      <div class="det-cat">${recipe.emoji} Cooking Task · ${recipe.time||'—'}</div>
+      <div class="det-title">Cook: ${recipe.name}</div>
+      <div class="det-desc">${recipe.desc}</div>
+    </div>
+    ${recipe.heroImg
+      ? `<img src="${recipe.heroImg}" style="width:100%;height:180px;object-fit:cover;display:block"/>`
+      : `<div style="width:100%;height:140px;background:linear-gradient(135deg,#FFF7ED,#FEF9C3);display:flex;align-items:center;justify-content:center;font-size:72px">${recipe.emoji}</div>`}
+    <div class="sh">Ingredients</div>
+    <div class="card">
+      ${(recipe.ingredients||[]).map((ing,i) => `
+        <div style="display:flex;justify-content:space-between;padding:11px 16px;border-bottom:${i<recipe.ingredients.length-1?'1px solid var(--line)':'none'}">
+          <div style="font-size:14px;font-weight:600;color:var(--ink)">${ing.name}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--ink3)">${ing.qty} ${ing.unit}</div>
+        </div>`).join('')}
+    </div>
+    <div class="sh">Steps</div>
+    <div class="card cp">
+      ${(recipe.steps||[]).map((s,i) => `
+        <div style="display:flex;gap:12px;margin-bottom:${i<recipe.steps.length-1?'14px':'0'}">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${i+1}</div>
+          <div style="font-size:14px;color:var(--ink2);line-height:1.5;flex:1">${typeof s==='string'?s:s.instruction}</div>
+        </div>`).join('')}
+    </div>
+    <div style="padding:12px 16px 24px">
+      <button class="cta done-green" onclick="markMealTaskDone('${recipeId}')">✓ Mark Meal as Prepared</button>
+    </div>
+  `;
+  goTo('f-detail');
+}
+
+function markMealTaskDone(recipeId) {
+  // Mark the meal task as completed in our tracking
+  const key = 'meal_done_' + recipeId;
+  window[key] = true;
+  toast('✅ Meal marked as prepared! Employer notified.');
+  setTimeout(() => { renderFdwSchedule(); goTo('f-schedule'); }, 1200);
+}
+
+// Stub for removed home screen
+function renderFdwHomeNext() { /* home screen removed */ }
+
+// ══════════════════════════════════════════════════
+// FDW TASK DETAIL — fully dynamic
+// ══════════════════════════════════════════════════
+function openFdwDetail(taskId) {
+  // Handle system grocery task
+  const t = taskId === GROCERY_TASK_ID
+    ? grocerySystemTask
+    : tasks.find(x => x.id === taskId);
+  if (!t) return;
+
+  // Reset PP confirmed state for a fresh open (only if not completed)
+  if (!t.completed) (t.petPeeves||[]).forEach(pp => pp.confirmed = false);
+
+  renderFdwDetail(t);
+  goTo('f-detail');
+}
+
+function renderFdwDetail(t) {
+  const ppTotal = (t.petPeeves||[]).length;
+  const ppDone  = (t.petPeeves||[]).filter(pp => pp.confirmed).length;
+  const allDone = ppTotal === 0 || ppDone === ppTotal;
+  const btnClass = allDone ? 'cta done-green' : 'cta off';
+  const btnText  = allDone ? '✓ Mark Task as Complete' : '🔒 Confirm All Priorities First';
+  const footText = allDone ? 'All priorities confirmed — ready to complete!' : 'Please tick all Employer\'s Priorities above to unlock';
+  const footCol  = allDone ? 'var(--green)' : 'var(--ink3)';
+
+  const suppliesHTML = (t.supplies||[]).map(s => {
+    const parts = s.split(' ');
+    const em = parts[0]; const lb = parts.slice(1).join(' ');
+    return `<div class="sup-item"><div class="sup-em">${em}</div><div class="sup-lb">${lb}</div></div>`;
+  }).join('');
+
+  const ppHTML = (t.petPeeves||[]).map(pp => {
+    const imgEl = pp.proofImg
+      ? `<div style="background:#000;border-radius:12px 12px 0 0;overflow:hidden;cursor:pointer" onclick="expandEvidencePhoto('${pp.proofImg}')">
+           <img src="${pp.proofImg}" style="width:100%;max-height:280px;object-fit:contain;display:block"/>
+           <div style="padding:5px 12px;font-size:11px;font-weight:700;color:#aaa;background:#000">📷 Tap to view full photo</div>
+         </div>`
+      : `<div class="pp-img" style="background:#FFFBEB;display:flex;align-items:center;justify-content:center;font-size:48px;height:120px">⚠️<div class="pp-x-badge">✕</div></div>`;
+    return `
+    <div class="pp-card" id="fdw-pp-card-${pp.id}">
+      ${imgEl}
+      <div class="pp-body">
+        <div class="pp-title">${pp.title}</div>
+        <div class="pp-note">${pp.note}</div>
+        ${pp.proTip?`<div class="pro-tip" style="margin:0 0 14px"><div class="pt-icon">💡</div><div><div class="pt-title">Pro Tip</div><div class="pt-text">${pp.proTip}</div></div></div>`:''}
+        <div class="pp-actions">
+          <button class="pp-confirm-btn${pp.confirmed?' done':''}" id="fdw-pp-btn-${t.id}-${pp.id}" onclick="toggleFdwPP(${t.id},${pp.id})">
+            <div class="pp-chk${pp.confirmed?' done':''}" id="fdw-pp-chk-${t.id}-${pp.id}">${pp.confirmed?'✓':''}</div>
+            <span id="fdw-pp-txt-${t.id}-${pp.id}">${pp.confirmed?'Confirmed ✓':'Mark as Done'}</span>
+          </button>
+          <label class="upload-lbl">
+            📷 Proof
+            <input type="file" accept="image/*" capture="environment" style="display:none" onchange="uploadPPProof(this,${t.id},${pp.id})"/>
+          </label>
+        </div>
+        <div class="pp-proof-box" id="fdw-proof-box-${t.id}-${pp.id}">
+          ${pp.proofImg?`<img class="pp-proof-img" src="${pp.proofImg}" alt="proof" onclick="expandEvidencePhoto('${pp.proofImg}')"/><div class="pp-proof-lbl">✓ Photo proof uploaded — tap to view full</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const proTipHTML = t.proTip ? `
+    <div class="pro-tip">
+      <div style="font-size:20px;flex-shrink:0">💡</div>
+      <div><div class="pt-title">Pro Tip from Owner</div><div class="pt-text">${t.proTip}</div></div>
+    </div>` : '';
+
+  document.getElementById('f-detail-content').innerHTML = `
+    <div class="det-head">
+      <button class="back-btn" onclick="goTo('f-schedule');renderFdwSchedule()">← Back to Schedule</button>
+      <div class="det-cat">${t.emoji} ${t.cat} · ${t.dur||''}</div>
+      <div class="det-title">${t.name}</div>
+      <div class="det-desc">${t.desc||''}</div>
+    </div>
+    ${suppliesHTML.length ? `<div class="sh">Required Supplies</div><div class="sup-grid">${suppliesHTML}</div><div style="height:8px"></div>` : ''}
+    ${ppTotal>0 ? `
+      <div class="pp-sec-row">
+        <div><div class="pp-sec-title">Employer's Priorities</div><div class="pp-sec-sub">"Watch out for these specific things!"</div></div>
+        <div class="pp-badge-red">⚠️ PET PEEVES</div>
+      </div>
+      ${ppHTML}
+    ` : '<div class="sh" style="color:var(--green)">✓ No pet peeves for this task</div>'}
+    ${proTipHTML}
+    <div class="notes-box">
+      <div class="notes-hd">📝 Completion Notes <span style="font-size:11px;font-weight:500;color:var(--ink3)">(optional)</span></div>
+      <textarea class="notes-ta" id="fdw-notes-${t.id}" placeholder="Mention anything unusual or confirm specific steps…"></textarea>
+      <div class="notes-imgs" id="notes-imgs-${t.id}"></div>
+      <label class="add-photo-lbl">📸 Add Photo<input type="file" accept="image/*" style="display:none" onchange="addNotePhoto(this,${t.id})"/></label>
+    </div>
+    <div class="verify-bar" id="verify-bar-${t.id}">
+      <div class="verify-lbl">Verification Status</div>
+      <div class="verify-ct ${allDone?'vc-comp':'vc-inc'}" id="verify-ct-${t.id}">${ppDone} / ${ppTotal} Confirmed</div>
+    </div>
+    <button class="${btnClass}" id="cta-complete-${t.id}" onclick="markTaskComplete(${t.id})">${btnText}</button>
+    <div class="cta-foot" id="cta-foot-${t.id}" style="color:${footCol}">${footText}</div>
+    <div style="height:16px"></div>
+  `;
+}
+
+function toggleFdwPP(taskId, ppId) {
+  const t = tasks.find(x => x.id === taskId);
+  if (!t) return;
+  const pp = t.petPeeves.find(p => p.id === ppId);
+  if (!pp) return;
+  pp.confirmed = !pp.confirmed;
+
+  // Update button visuals
+  const btn = document.getElementById(`fdw-pp-btn-${taskId}-${ppId}`);
+  const chk = document.getElementById(`fdw-pp-chk-${taskId}-${ppId}`);
+  const txt = document.getElementById(`fdw-pp-txt-${taskId}-${ppId}`);
+  if (btn) btn.className = 'pp-confirm-btn' + (pp.confirmed?' done':'');
+  if (chk) { chk.className = 'pp-chk' + (pp.confirmed?' done':''); chk.textContent = pp.confirmed?'✓':''; }
+  if (txt) txt.textContent = pp.confirmed ? 'Confirmed ✓' : 'Mark as Done';
+
+  // Persist PP confirmation to Supabase
+  db.updatePP(ppId, { confirmed: pp.confirmed }).catch(e => console.warn('PP sync error:', e));
+  updateVerifyBar(taskId);
+}
+
+function updateVerifyBar(taskId) {
+  const t = tasks.find(x => x.id === taskId);
+  if (!t) return;
+  const ppTotal = t.petPeeves.length;
+  const ppDone  = t.petPeeves.filter(p => p.confirmed).length;
+  const allDone = ppTotal === 0 || ppDone === ppTotal;
+
+  const ct   = document.getElementById(`verify-ct-${taskId}`);
+  const cta  = document.getElementById(`cta-complete-${taskId}`);
+  const foot = document.getElementById(`cta-foot-${taskId}`);
+
+  if (ct) { ct.textContent = `${ppDone} / ${ppTotal} Confirmed`; ct.className = 'verify-ct ' + (allDone?'vc-comp':'vc-inc'); }
+  if (cta) { cta.className = 'cta ' + (allDone?'done-green':'off'); cta.textContent = allDone ? '✓ Mark Task as Complete' : '🔒 Confirm All Priorities First'; }
+  if (foot) { foot.style.color = allDone?'var(--green)':'var(--ink3)'; foot.textContent = allDone ? 'All priorities confirmed — ready to complete!' : 'Please tick all Employer\'s Priorities above to unlock'; }
+}
+
+function markTaskComplete(taskId) {
+  // Handle grocery system task
+  const t = taskId === GROCERY_TASK_ID
+    ? grocerySystemTask
+    : tasks.find(x => x.id === taskId);
+  if (!t) return;
+
+  // Grocery task: must have submitted list first
+  if (t.groceryTask && !t.grocerySubmitted) {
+    toast('Please submit the grocery list to employer first');
+    fNav('grocery', null);
+    return;
+  }
+
+  const ppTotal = (t.petPeeves||[]).length;
+  const ppDone  = (t.petPeeves||[]).filter(p => p.confirmed).length;
+  if (ppDone < ppTotal) { toast('⚠️ Please confirm all priorities first'); return; }
+
+  // Save any typed completion notes
+  const ta = document.getElementById('fdw-notes-' + taskId);
+  if (ta && ta.value.trim()) t.noteText = ta.value.trim();
+
+  t.completed = true;
+  const now = new Date();
+  t.completedAt = now.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'});
+
+  // Persist to Supabase
+  db.updateTask(taskId, {
+    completed: true,
+    completed_at: t.completedAt,
+    note_text: t.noteText || null,
+    note_photos: t.notePhotos || [],
+  }).catch(e => console.warn('DB sync error:', e));
+
+  toast('✅ "' + t.name + '" marked complete! Employer notified.');
+  setTimeout(() => { renderFdwSchedule(); renderTrackerHome(); goTo('f-schedule'); }, 1200);
+}
+
+// ══════════════════════════════════════════════════
+// PHOTO UPLOAD (FDW)
+// ══════════════════════════════════════════════════
+function uploadPPProof(input, taskId, ppId) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const t = tasks.find(x => x.id === taskId);
+    const pp = t && t.petPeeves.find(p => p.id === ppId);
+    if (pp) pp.proofImg = e.target.result;
+
+    const box = document.getElementById(`fdw-proof-box-${taskId}-${ppId}`);
+    if (box) { box.style.display='block'; box.innerHTML=`<img class="pp-proof-img" src="${e.target.result}" onclick="expandEvidencePhoto('${e.target.result}')"/><div class="pp-proof-lbl">✓ Photo proof uploaded — tap to view full</div>`; }
+
+    // Upload to Supabase Storage
+    const storagePath = `pp-${taskId}-${ppId}-${Date.now()}`;
+    uploadPhoto('evidence-photos', storagePath, e.target.result)
+      .then(url => db.updatePP(ppId, { proof_url: url }))
+      .catch(err => console.warn('Photo upload error:', err));
+
+    toast('📷 Proof photo saved');
+    // Auto-confirm this pp
+    if (pp && !pp.confirmed) toggleFdwPP(taskId, ppId);
+  };
+  reader.readAsDataURL(file);
+}
+
+function addNotePhoto(input, taskId) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    // Store on task object so employer can see it
+    const t = taskId === GROCERY_TASK_ID
+      ? grocerySystemTask : tasks.find(x => x.id === taskId);
+    if (t) {
+      if (!t.notePhotos) t.notePhotos = [];
+      t.notePhotos.push(e.target.result);
+      const ta = document.getElementById(`fdw-notes-${taskId}`);
+      if (ta) t.noteText = ta.value;
+    }
+    const container = document.getElementById(`notes-imgs-${taskId}`);
+    if (container) {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'width:72px;height:72px;object-fit:cover;border-radius:10px;border:2px solid var(--line)';
+      container.appendChild(img);
+    }
+    toast('📸 Photo added — employer will see this as evidence');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══════════════════════════════════════════════════
+// SCHEDULE — WEEKLY OVERVIEW & DAY DETAIL
+// ══════════════════════════════════════════════════
+const DAY_KEYS   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAY_LABELS = {Mon:'Monday, Mar 23',Tue:'Tuesday, Mar 24',Wed:'Wednesday, Mar 25',Thu:'Thursday, Mar 26',Fri:'Friday, Mar 27',Sat:'Saturday, Mar 28',Sun:'Sunday, Mar 29'};
+const DAY_SHORT  = {Mon:'Mon 23',Tue:'Tue 24',Wed:'Wed 25',Thu:'Thu 26',Fri:'Fri 27',Sat:'Sat 28',Sun:'Sun 29'};
+
+// Week navigation — offset from the base week (Mar 23–29 2026 = 0)
+let weekOffset = 0;
+
+// Base week dates (Mon Mar 23 2026 = day 0)
+const BASE_WEEK_MON = new Date(2026, 2, 23); // month is 0-indexed
+
+function getWeekDates(offset) {
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(BASE_WEEK_MON);
+    d.setDate(BASE_WEEK_MON.getDate() + offset * 7 + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function formatWeekLabel(offset) {
+  const dates = getWeekDates(offset);
+  const mon = dates[0]; const sun = dates[6];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const start = mon.getDate() + ' ' + months[mon.getMonth()];
+  const end   = sun.getDate() + ' ' + months[sun.getMonth()] + ' ' + sun.getFullYear();
+  return start + ' – ' + end;
+}
+
+function formatDayShort(date) {
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return days[date.getDay()] + ' ' + date.getDate();
+}
+
+function getDayKey(date) {
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return days[date.getDay()];
+}
+
+function shiftWeek(dir) {
+  weekOffset += dir;
+  renderWeeklyOverview();
+  // Update month title
+  const dates   = getWeekDates(weekOffset);
+  const months  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const titleEl = document.getElementById('wk-month-title');
+  if (titleEl) titleEl.textContent = months[dates[0].getMonth()] + ' ' + dates[0].getFullYear();
+  // Update week label in the sh element
+  const shEl = document.querySelector('#e-schedule .sh');
+  if (shEl) shEl.innerHTML = 'Week of ' + formatWeekLabel(weekOffset) + ' <span style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:none;letter-spacing:0">Tap any day to manage it</span>';
+}
+
+const scheduleData = {
+  Mon: [{name:'Breakfast Prep',        emoji:'☕', cat:'Cooking',    time:'7:30 AM'},
+        {name:'Bathroom Sanitisation', emoji:'🛁', cat:'Cleaning',   time:'10:00 AM'}],
+  Tue: [{name:'Laundry & Folding',     emoji:'👕', cat:'Cleaning',   time:'9:00 AM'},
+        {name:'Meal Prep – Lunch',     emoji:'🥗', cat:'Cooking',    time:'11:30 AM'}],
+  Wed: [{name:'Living Room Deep Clean',emoji:'🧹', cat:'Cleaning',   time:'9:00 AM'},
+        {name:'Meal Prep – Dinner',    emoji:'🍽️', cat:'Cooking',   time:'4:30 PM'}],
+  Thu: [{name:'Pick up Sofia',         emoji:'🎓', cat:'Child Care', time:'3:30 PM'}],
+  Fri: [{name:'Grocery Restocking',    emoji:'🛒', cat:'Other',      time:'10:00 AM'},
+        {name:'Kitchen Polish',        emoji:'✨', cat:'Cleaning',   time:'2:00 PM'}],
+  Sat: [], Sun: [],
+};
+
+// poolTasks removed — schedule uses tasks[] from Task Admin
+
+let currentSchedDay = 'Wed';
+let selectedPoolTask = null;
+const CAT_IC = {'Cleaning':'ic-b','Cooking':'ic-g','Child Care':'ic-a','Other':'ic-b'};
+
+// Weekly overview — all days as summary cards
+function renderWeeklyOverview() {
+  const el = document.getElementById('weekly-overview-grid');
+  if (!el) return;
+  const CAT_COLORS = {'Cleaning':'#2563EB','Cooking':'#059669','Child Care':'#D97706','Other':'#64748B'};
+  const weekDates  = getWeekDates(weekOffset);
+
+  el.innerHTML = weekDates.map((date, idx) => {
+    const key    = getDayKey(date);
+    const items  = scheduleData[key] || [];
+    const isRest = key === 'Sun';
+    const isSat  = key === 'Sat';
+    const count  = items.length;
+    const dayStr = formatDayShort(date);
+    const cats   = [...new Set(items.map(i => i.cat))];
+    const dots   = cats.map(c => `<span style="width:8px;height:8px;border-radius:50%;background:${CAT_COLORS[c]||'#94A3B8'};display:inline-block"></span>`).join('');
+    const preview = items.slice(0,2).map(i => `<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--bg);border-radius:20px;padding:2px 8px;color:var(--ink2);font-weight:600">${i.emoji} ${i.name}</span>`).join('');
+    const extra   = count > 2 ? `<span style="font-size:11px;color:var(--ink3);font-weight:600">+${count-2} more</span>` : '';
+
+    if (isRest) return `
+      <div style="margin:0 16px 10px;background:var(--white);border-radius:18px;padding:14px 16px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px;opacity:.45">
+        <div style="width:44px;height:44px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px">🌙</div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:700;color:var(--ink)">${dayStr}</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">Rest day — no tasks</div></div>
+        <span style="background:#F1F5F9;color:var(--ink3);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px">MOM Rest</span>
+      </div>`;
+
+    return `
+      <div style="margin:0 16px 10px;background:var(--white);border-radius:18px;padding:14px 16px;box-shadow:var(--sh);cursor:pointer" onclick="openDayDetail('${key}')">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${count?'10px':'0'}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:16px;font-weight:800;color:var(--ink)">${dayStr}</div>
+            <span style="background:${count?'var(--blue-l)':'var(--bg)'};color:${count?'var(--blue)':'var(--ink3)'};font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px">${count} task${count!==1?'s':''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">${dots}<span style="font-size:18px;color:var(--line);margin-left:4px">›</span></div>
+        </div>
+        ${count
+          ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${preview}${extra}</div>`
+          : `<div style="font-size:12px;color:var(--ink3)">No tasks yet — tap to add</div>`}
+      </div>`;
+  }).join('');
+}
+
+// Drill into a specific day
+function openDayDetail(dayKey) {
+  if (dayKey === 'Sun') { openModal('restModal'); return; }
+  currentSchedDay = dayKey;
+  selectedPoolTask = null;
+  renderSchedDay();
+  renderPoolGrid();
+  goTo('e-day-detail');
+}
+
+// Shift day with ‹ › arrows
+function shiftDay(dir) {
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat'];
+  const idx  = days.indexOf(currentSchedDay);
+  const next = days[idx + dir];
+  if (!next) { toast(dir > 0 ? 'Last day of the week' : 'First day of the week'); return; }
+  currentSchedDay = next;
+  selectedPoolTask = null;
+  renderSchedDay();
+  renderPoolGrid();
+}
+
+function selDay(el, dayKey) { openDayDetail(dayKey); }
+
+// Render tasks for the current selected day
+function renderSchedDay() {
+  const items = scheduleData[currentSchedDay] || [];
+  const eye   = document.getElementById('day-detail-eye');
+  const lbl   = document.getElementById('sched-day-label');
+  const tasks = document.getElementById('sched-day-tasks');
+  const zone  = document.getElementById('sched-drop-zone');
+  if (eye) eye.textContent = DAY_LABELS[currentSchedDay] || currentSchedDay;
+  if (lbl) lbl.innerHTML  = (DAY_LABELS[currentSchedDay] || currentSchedDay) +
+    ` <span class="chip cb" id="sched-task-count">${items.length} task${items.length!==1?'s':''}</span>`;
+
+  if (currentSchedDay === 'Sat') {
+    if (tasks) tasks.innerHTML = `<div style="margin:0 16px 10px;padding:20px;background:var(--white);border-radius:var(--r);text-align:center;box-shadow:var(--sh);color:var(--ink3);font-size:13px;font-weight:600">🌴 Saturday — light schedule day</div>`;
+    if (zone)  zone.style.display = 'none';
+    return;
+  }
+  if (zone) zone.style.display = 'flex';
+
+  if (tasks) tasks.innerHTML = items.map((item, idx) => `
+    <div class="etc fadein">
+      <div class="tile-icon ${CAT_IC[item.cat]||'ic-b'}" style="border-radius:14px">${item.emoji}</div>
+      <div class="etc-info"><div class="etc-name">${item.name}</div><div class="etc-sub">Maria G.</div></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="etc-time">${item.time}</div>
+        <button style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0" onclick="removeSchedTask('${currentSchedDay}',${idx})">✕</button>
+      </div>
+    </div>`).join('') ||
+    `<div style="margin:0 16px 10px;padding:18px;background:var(--white);border-radius:var(--r);text-align:center;box-shadow:var(--sh);color:var(--ink3);font-size:13px;font-weight:600">No tasks yet — add from pool below</div>`;
+}
+
+function removeSchedTask(day, idx) {
+  scheduleData[day].splice(idx, 1);
+  renderSchedDay();
+  renderWeeklyOverview();
+  toast('Task removed');
+}
+
+// Pool grid — tasks available to schedule
+function renderPoolGrid() {
+  const grid = document.getElementById('pool-grid');
+  if (!grid) return;
+  const badge = document.getElementById('pool-count-badge');
+  // Use tasks from Task Admin (exclude system task)
+  const poolSource = tasks.filter(t => !t.system);
+  if (badge) badge.textContent = poolSource.length + ' Available';
+
+  if (!poolSource.length) {
+    grid.innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--ink3);grid-column:1/-1">No tasks yet — create tasks in Task Admin first</div>';
+    return;
+  }
+
+  grid.innerHTML = poolSource.map(t => {
+    const sel = selectedPoolTask && selectedPoolTask.id === t.id;
+    const catColor = {'Cleaning':'var(--ink3)','Cooking':'var(--green)','Child Care':'var(--amber)','Other':'var(--ink3)'}[t.cat]||'var(--ink3)';
+    return `
+      <div class="pool-card${sel?' selected':''}" onclick="selectPoolTask(${t.id})">
+        <div style="font-size:30px">${t.emoji||'📋'}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);text-align:center;line-height:1.3">${t.name}</div>
+        <div style="font-size:10px;font-weight:700;color:${catColor};text-transform:uppercase">${t.cat}</div>
+        ${sel ? '<div style="font-size:11px;font-weight:800;color:var(--blue);margin-top:2px">✓ Selected</div>' : ''}
+      </div>`;
+  }).join('');
+}
+
+function selectPoolTask(id) {
+  const numId = Number(id);
+  const task = tasks.find(t => t.id === numId);
+  if (!task) return;
+  const zone = document.getElementById('sched-drop-zone');
+  if (selectedPoolTask && selectedPoolTask.id === id) {
+    selectedPoolTask = null;
+    if (zone) { zone.classList.remove('ready'); zone.textContent = '＋ Tap a pool task below to select it, then tap here to schedule'; }
+  } else {
+    selectedPoolTask = task;
+    if (zone) { zone.classList.add('ready'); zone.textContent = `＋ Tap here to schedule "${task.name}"`; }
+    toast(`"${task.name}" selected — tap the zone above`);
+  }
+  renderPoolGrid();
+}
+
+function dropZoneTapped() {
+  if (!selectedPoolTask) { toast('First tap a task from the pool below'); return; }
+  if (currentSchedDay === 'Sat' || currentSchedDay === 'Sun') { toast('Cannot schedule on rest day'); return; }
+  document.getElementById('time-modal-task-name').textContent = selectedPoolTask.name;
+  document.getElementById('time-modal-day').textContent = DAY_LABELS[currentSchedDay] || currentSchedDay;
+  openModal('timePickerModal');
+}
+
+function confirmSchedule() {
+  const timeVal = document.getElementById('sched-time-input').value;
+  if (!timeVal) { toast('Please pick a time'); return; }
+  const [h, m] = timeVal.split(':');
+  const hr = parseInt(h);
+  const formatted = `${hr > 12 ? hr - 12 : hr || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
+  scheduleData[currentSchedDay].push({name:selectedPoolTask.name, emoji:selectedPoolTask.emoji, cat:selectedPoolTask.cat, time:formatted});
+  scheduleData[currentSchedDay].sort((a,b)=>{
+    const toM = t => { const [hm,ap]=t.split(' ');const [hh,mm]=hm.split(':');let h=parseInt(hh);if(ap==='PM'&&h!==12)h+=12;if(ap==='AM'&&h===12)h=0;return h*60+parseInt(mm); };
+    return toM(a.time)-toM(b.time);
+  });
+  closeModal('timePickerModal');
+  selectedPoolTask = null;
+  const zone = document.getElementById('sched-drop-zone');
+  if (zone) { zone.classList.remove('ready'); zone.textContent = '＋ Tap a pool task below to select it, then tap here to schedule'; }
+  renderSchedDay();
+  renderPoolGrid();
+  renderWeeklyOverview();
+  toast(`✅ "${scheduleData[currentSchedDay][scheduleData[currentSchedDay].length-1].name}" added to schedule`);
+}
+
+// ══════════════════════════════════════════════════
+// EMPLOYER — NEW TASK
+// ══════════════════════════════════════════════════
+function toggleDayField(recur) {
+  const row = document.getElementById('nt-day-row');
+  if (row) row.style.display = (recur && recur !== 'none' && recur !== 'daily') ? 'block' : 'none';
+}
+
+function openNewTaskModal() {
+  document.getElementById('nt-name').value = '';
+  document.getElementById('nt-desc').value = '';
+  document.getElementById('nt-emoji').value = '';
+  document.getElementById('nt-recur').value = 'none';
+  const row = document.getElementById('nt-day-row');
+  if (row) row.style.display = 'none';
+  openModal('newTaskModal');
+}
+
+function saveNewTask() {
+  const name  = document.getElementById('nt-name').value.trim();
+  if (!name) { toast('Please enter a task name'); return; }
+  const cat   = document.getElementById('nt-cat').value;
+  const emoji = document.getElementById('nt-emoji').value.trim() || CAT_ICONS[cat] || '📋';
+  const desc  = document.getElementById('nt-desc').value.trim();
+  const dur   = document.getElementById('nt-dur').value;
+  const recur = document.getElementById('nt-recur').value;
+  const day   = document.getElementById('nt-day').value;
+
+  const newTask = { id:nextTaskId++, name, emoji, cat, dur, desc, recur, day,
+                    petPeeves:[], completed:false, time:'09:00 AM' };
+  // Local-first: add immediately, sync to DB in background
+  tasks.push(newTask);
+  applyRecurringTask(newTask);
+  renderTaskLibrary();
+  renderWeeklyOverview();
+  closeModal('newTaskModal');
+  toast(`✅ "${name}" created${recur!=='none' ? ' — recurs '+recur+' on '+day+'s' : ''}`);
+  // DB sync
+  if (currentUser) {
+    Promise.resolve()
+      .then(() => _sb.from('tasks').insert({ name, emoji, cat, dur, description: desc, time_slot: '09:00 AM', recur, recur_day: day, is_system: false, completed: false }).select().single())
+      .then(({data}) => { if (data) newTask.id = data.id; })
+      .catch(e => console.warn('Save task DB error:', e.message));
+  }
+}
+
+// Inject a recurring task into scheduleData based on its recurrence rule
+function applyRecurringTask(t) {
+  if (!t.recur || t.recur === 'none') return;
+  const targetDays = [];
+  if (t.recur === 'daily') {
+    targetDays.push(...['Mon','Tue','Wed','Thu','Fri']);
+  } else {
+    // weekly, biweekly, monthly, quarterly — all appear on the chosen day in this week view
+    if (t.day) targetDays.push(t.day);
+  }
+  targetDays.forEach(d => {
+    if (!scheduleData[d]) scheduleData[d] = [];
+    // Avoid duplicate
+    if (!scheduleData[d].find(s => s.name === t.name)) {
+      scheduleData[d].push({ name:t.name, emoji:t.emoji, cat:t.cat,
+                              time:t.time||'09:00 AM',
+                              recur:t.recur, taskId:t.id });
+    }
+  });
+}
+
+// Rebuild all recurring tasks in schedule from the tasks array
+function applyAllRecurring() {
+  tasks.filter(t => t.recur && t.recur !== 'none').forEach(applyRecurringTask);
+}
+
+function deleteTask(taskId) {
+  const id = Number(taskId);  // coerce string "1" → number 1 for strict equality
+  if (id === GROCERY_TASK_ID) { toast('The Grocery Check task is a system task and cannot be deleted'); return; }
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  if (t.system) { toast('System tasks cannot be deleted'); return; }
+  pendingDeleteTaskId = id;
+  document.getElementById('del-task-name').textContent = t.name;
+  openModal('deleteTaskModal');
+}
+
+function confirmDeleteTask() {
+  const idToDelete = pendingDeleteTaskId;
+  pendingDeleteTaskId = null;
+  // Do local update first — never depends on DB
+  tasks = tasks.filter(t => t.id !== idToDelete);
+  closeModal('deleteTaskModal');
+  renderTaskLibrary();
+  toast('Task deleted');
+  // DB sync in background — safe to fail
+  if (currentUser) {
+    db.deletePP && Promise.resolve()
+      .then(() => _sb.from('tasks').delete().eq('id', idToDelete))
+      .catch(e => console.warn('DB delete:', e.message));
+  }
+}
+
+// ══════════════════════════════════════════════════
+// EMPLOYER — PET PEEVE ADD / EDIT / DELETE
+// ══════════════════════════════════════════════════
+function openAddPP(taskId) {
+  editingPPTaskId = taskId;
+  editingPPId = null;
+  pendingPhotoDataUrl = null;
+  const t = taskId === GROCERY_TASK_ID ? grocerySystemTask : tasks.find(x => x.id === taskId);
+  document.getElementById('pp-modal-title').textContent = `Add Pet Peeve${t ? ' — '+t.name : ''}`;
+  document.getElementById('pp-inp-title').value = '';
+  document.getElementById('pp-inp-note').value = '';
+  document.getElementById('pp-inp-tip').value = '';
+  document.getElementById('pp-modal-preview').style.display = 'none';
+  document.getElementById('pp-img-pick-lbl').style.display = 'flex';
+  openModal('ppModal');
+}
+
+function openEditPP(taskId, ppId) {
+  const t = taskId === GROCERY_TASK_ID ? grocerySystemTask : tasks.find(x => x.id === taskId);
+  const pp = t && t.petPeeves.find(p => p.id === ppId);
+  if (!pp) return;
+  editingPPTaskId = taskId;
+  editingPPId = ppId;
+  pendingPhotoDataUrl = pp.proofImg || null;
+  document.getElementById('pp-modal-title').textContent = 'Edit Pet Peeve';
+  document.getElementById('pp-inp-title').value = pp.title;
+  document.getElementById('pp-inp-note').value = pp.note;
+  document.getElementById('pp-inp-tip').value = pp.proTip || '';
+  const prev = document.getElementById('pp-modal-preview');
+  if (pp.proofImg) { prev.src = pp.proofImg; prev.style.display = 'block'; document.getElementById('pp-img-pick-lbl').style.display = 'none'; }
+  else { prev.style.display = 'none'; document.getElementById('pp-img-pick-lbl').style.display = 'flex'; }
+  openModal('ppModal');
+}
+
+function previewPPImg(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingPhotoDataUrl = e.target.result;
+    const prev = document.getElementById('pp-modal-preview');
+    prev.src = e.target.result; prev.style.display = 'block';
+    document.getElementById('pp-img-pick-lbl').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function savePetPeeve() {
+  const title = document.getElementById('pp-inp-title').value.trim();
+  const note  = document.getElementById('pp-inp-note').value.trim();
+  const tip   = document.getElementById('pp-inp-tip').value.trim();
+  if (!title) { toast('Please enter a title for the pet peeve'); return; }
+
+  const t = editingPPTaskId === GROCERY_TASK_ID ? grocerySystemTask : tasks.find(x => x.id === editingPPTaskId);
+  if (!t) return;
+
+  if (editingPPId !== null) {
+    // Editing existing
+    const pp = t.petPeeves.find(p => p.id === editingPPId);
+    if (pp) { pp.title = title; pp.note = note; pp.proTip = tip; if (pendingPhotoDataUrl) pp.proofImg = pendingPhotoDataUrl; }
+    toast(`✅ Pet peeve "${title}" updated`);
+  } else {
+    // New pet peeve
+    const bg = ['#FEE2E2','#DBEAFE','#FEF9C3','#DCFCE7','#FEE2E2'][t.petPeeves.length % 5];
+    t.petPeeves.push({ id: nextPPId++, title, note, proTip: tip, emoji:'⚠️', bg, proofImg: pendingPhotoDataUrl, confirmed:false });
+    toast(`✅ Pet peeve "${title}" added to "${t.name}"`);
+  }
+
+  closeModal('ppModal');
+  renderTaskLibrary();
+}
+
+function deletePP(taskId, ppId) {
+  const t = taskId === GROCERY_TASK_ID ? grocerySystemTask : tasks.find(x => x.id === taskId);
+  if (!t) return;
+  t.petPeeves = t.petPeeves.filter(p => p.id !== ppId);
+  renderTaskLibrary();
+  toast('Pet peeve removed');
+  if (currentUser) {
+    Promise.resolve()
+      .then(() => _sb.from('pet_peeves').delete().eq('id', ppId))
+      .catch(e => console.warn('Delete PP DB error:', e.message));
+  }
+}
+
+// ══════════════════════════════════════════════════
+// COOKBOOK & MEAL PLAN DATA
+// ══════════════════════════════════════════════════
+
+// Cookbook: array of recipe objects
+let cookbook = [
+  {
+    id:'r1', name:'Hainanese Chicken Rice', emoji:'🍚', url:'https://www.recipetineats.com/hainanese-chicken-rice/',
+    time:'45 min', servings:4, cat:'Mains',
+    desc:'Classic Singapore dish of tender poached chicken served over fragrant rice cooked in chicken broth.',
+    ingredients:[
+      {name:'Whole Chicken',    qty:'1.5',  unit:'kg'},
+      {name:'Jasmine Rice',     qty:'400',  unit:'g'},
+      {name:'Ginger',           qty:'60',   unit:'g'},
+      {name:'Garlic',           qty:'6',    unit:'cloves'},
+      {name:'Spring Onion',     qty:'4',    unit:'stalks'},
+      {name:'Sesame Oil',       qty:'1',    unit:'tbsp'},
+      {name:'Soy Sauce',        qty:'3',    unit:'tbsp'},
+      {name:'Chicken Stock',    qty:'1',    unit:'L'},
+    ],
+    steps:['Blanch chicken in boiling water for 1 minute, discard water.','Simmer chicken in fresh water with ginger and spring onion for 35 min.','Cook rice in chicken broth with garlic and ginger.','Slice chicken, serve over rice with chilli and ginger sauces.'],
+  },
+  {
+    id:'r2', name:'Aglio e Olio', emoji:'🍝', url:'https://www.bonappetit.com/recipe/spaghetti-aglio-e-olio',
+    time:'20 min', servings:2, cat:'Pasta',
+    desc:'Simple Italian pasta with garlic, olive oil, chilli, and parsley. Quick and flavourful weeknight meal.',
+    ingredients:[
+      {name:'Spaghetti',        qty:'400',  unit:'g'},
+      {name:'Olive Oil',        qty:'80',   unit:'ml'},
+      {name:'Garlic',           qty:'8',    unit:'cloves'},
+      {name:'Chilli Flakes',    qty:'1',    unit:'tsp'},
+      {name:'Fresh Parsley',    qty:'1',    unit:'bunch'},
+      {name:'Parmesan',         qty:'50',   unit:'g'},
+    ],
+    steps:['Cook spaghetti until al dente, reserve 1 cup pasta water.','Sauté sliced garlic in olive oil over low heat until golden.','Add chilli flakes, then pasta and a splash of pasta water.','Toss with parsley and parmesan, serve immediately.'],
+  },
+  {
+    id:'r3', name:'Fish Curry with Rice', emoji:'🍛', url:'https://www.allrecipes.com/recipe/fish-curry',
+    time:'60 min', servings:4, cat:'Mains',
+    desc:'Rich and aromatic Singaporean-style fish curry with coconut milk, served over steamed rice.',
+    ingredients:[
+      {name:'Fish Fillets',     qty:'600',  unit:'g'},
+      {name:'Coconut Milk',     qty:'400',  unit:'ml'},
+      {name:'Curry Powder',     qty:'3',    unit:'tbsp'},
+      {name:'Onion',            qty:'2',    unit:'whole'},
+      {name:'Tomato',           qty:'2',    unit:'whole'},
+      {name:'Ginger',           qty:'30',   unit:'g'},
+      {name:'Garlic',           qty:'4',    unit:'cloves'},
+      {name:'Jasmine Rice',     qty:'300',  unit:'g'},
+      {name:'Vegetable Oil',    qty:'2',    unit:'tbsp'},
+    ],
+    steps:['Blend onion, ginger, garlic into a paste.','Fry paste with curry powder until fragrant, 5 min.','Add coconut milk and tomatoes, simmer 15 min.','Add fish fillets, cook 10 min until flaky. Serve with rice.'],
+  },
+];
+let nextRecipeId = 10;
+
+// Week plan: day → recipeId or null
+const MEAL_DAYS = ['Mon','Tue','Wed','Thu','Fri'];
+const MEAL_DAY_LABELS = {Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday'};
+let weekPlan = {
+  Mon: {recipeId:'r1', pax:4, scaled: null},
+  Tue: {recipeId:'r2', pax:2, scaled: null},
+  Wed: {recipeId:'r3', pax:4, scaled: null},
+  Thu: null,
+  Fri: null
+};
+
+// FDW grocery state: key=ingredientKey, value={status:'have'|'need', qty, unit, adjustedQty}
+let fdwGroceryState = {};
+let weekPlanReleased = false;
+
+// Pending recipe being previewed before save
+let pendingRecipe = null;
+
+// ══════════════════════════════════════════════════
+// MEALS SUB-TABS
+// ══════════════════════════════════════════════════
+function mealTab(tab) {
+  document.getElementById('panel-cookbook').style.display  = tab==='cookbook'  ? 'block' : 'none';
+  document.getElementById('panel-weekplan').style.display  = tab==='weekplan'  ? 'block' : 'none';
+  const cb = document.getElementById('tab-cookbook');
+  const wp = document.getElementById('tab-weekplan');
+  if (tab==='cookbook') {
+    cb.style.background=var_white; cb.style.color='var(--blue)'; cb.style.boxShadow='var(--sh)';
+    wp.style.background='transparent'; wp.style.color='var(--ink3)'; wp.style.boxShadow='none';
+    renderCookbook();
+  } else {
+    wp.style.background=var_white; wp.style.color='var(--blue)'; wp.style.boxShadow='var(--sh)';
+    cb.style.background='transparent'; cb.style.color='var(--ink3)'; cb.style.boxShadow='none';
+    renderWeekPlan();
+  }
+}
+const var_white = '#ffffff';
+
+function eNavMeals() {
+  renderCookbook();
+}
+
+// ══════════════════════════════════════════════════
+// COOKBOOK RENDER
+// ══════════════════════════════════════════════════
+function renderCookbook() {
+  const el = document.getElementById('cookbook-grid');
+  if (!el) return;
+  const badge = document.getElementById('cookbook-count-badge');
+  if (badge) badge.textContent = cookbook.length + ' recipe' + (cookbook.length!==1?'s':'');
+
+  if (!cookbook.length) {
+    el.innerHTML = '<div style="margin:0 16px;padding:32px;text-align:center;background:var(--white);border-radius:var(--r);box-shadow:var(--sh);color:var(--ink3);font-size:14px">No recipes yet.<br/>Paste a URL above to add your first recipe.</div>';
+    return;
+  }
+
+  el.innerHTML = cookbook.map(r => `
+    <div style="margin:0 16px 14px;background:var(--white);border-radius:20px;box-shadow:var(--sh);overflow:hidden;cursor:pointer" onclick="openRecipeDetail('${r.id}')">
+      <!-- Hero image area -->
+      <div style="width:100%;height:160px;position:relative;overflow:hidden">
+        ${r.heroImg
+          ? `<img src="${r.heroImg}" style="width:100%;height:160px;object-fit:cover;display:block"/>`
+          : `<div style="width:100%;height:160px;background:linear-gradient(135deg,#FFF7ED,#FEF9C3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+               <span style="font-size:52px">${r.emoji}</span>
+               <label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.35);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer">
+                 📷 Add photo
+                 <input type="file" accept="image/*" style="display:none" onchange="uploadHeroPhoto(event,'${r.id}')"/>
+               </label>
+             </div>`}
+        ${r.heroImg ? `<label onclick="event.stopPropagation()" style="position:absolute;bottom:10px;left:10px;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer">📷 Change photo<input type="file" accept="image/*" style="display:none" onchange="uploadHeroPhoto(event,'${r.id}')"/></label>` : ''}
+        <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px">⏱ ${r.time}</div>
+        <button onclick="event.stopPropagation();deleteRecipe('${r.id}')" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <div style="padding:14px 16px">
+        <div style="font-size:16px;font-weight:800;color:var(--ink);margin-bottom:4px">${r.name}</div>
+        <div style="font-size:12px;color:var(--ink3);line-height:1.4;margin-bottom:10px">${r.desc}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;gap:8px">
+            <span class="chip cb">👤 ${r.servings} servings</span>
+            <span class="chip" style="background:#F0FDF4;color:#059669">${r.ingredients.length} ingredients</span>
+          </div>
+          <a href="${r.url}" target="_blank" onclick="event.stopPropagation()" style="font-size:12px;color:var(--blue);font-weight:700;text-decoration:none">Source ↗</a>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// RECIPE DETAIL (Employer)
+// ══════════════════════════════════════════════════
+function openRecipeDetail(id) {
+  const r = cookbook.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('e-recipe-detail-content').innerHTML = `
+    <div style="background:var(--white);padding:16px 20px;position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line)">
+      <button class="back-btn" onclick="goTo('e-meals');renderCookbook()">← Cookbook</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+        <div style="font-size:22px;font-weight:800;color:var(--ink);flex:1;line-height:1.2">${r.name}</div>
+        <a href="${r.url}" target="_blank" style="font-size:12px;font-weight:700;color:var(--blue);text-decoration:none;flex-shrink:0;margin-left:10px">View Source ↗</a>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <span class="chip cb">⏱ ${r.time}</span>
+        <span class="chip cg">👤 ${r.servings} servings</span>
+        <span class="chip ca">${r.cat}</span>
+      </div>
+    </div>
+    <!-- Hero -->
+    <div style="width:100%;height:200px;position:relative;overflow:hidden">
+      ${r.heroImg
+        ? `<img src="${r.heroImg}" style="width:100%;height:200px;object-fit:cover;display:block"/>`
+        : `<div style="width:100%;height:200px;background:linear-gradient(135deg,#FFF7ED,#FEF9C3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+             <span style="font-size:72px">${r.emoji}</span>
+             <label style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.3);color:#fff;font-size:12px;font-weight:700;padding:6px 16px;border-radius:20px;cursor:pointer">
+               📷 Add a photo of the finished dish
+               <input type="file" accept="image/*" style="display:none" onchange="uploadHeroPhoto(event,'${r.id}');openRecipeDetail('${r.id}')"/>
+             </label>
+           </div>`}
+      ${r.heroImg ? `<label style="position:absolute;bottom:12px;right:12px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.45);color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;cursor:pointer">📷 Change photo<input type="file" accept="image/*" style="display:none" onchange="uploadHeroPhoto(event,'${r.id}');openRecipeDetail('${r.id}')"/></label>` : ''}
+    </div>
+    <div style="padding:14px 16px 6px;font-size:14px;color:var(--ink3);line-height:1.5">${r.desc}</div>
+    <!-- Ingredients -->
+    <div class="sh">Ingredients</div>
+    <div class="card">
+      ${r.ingredients.map((ing,i) => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:${i<r.ingredients.length-1?'1px solid var(--line)':'none'}">
+          <div style="font-size:14px;font-weight:600;color:var(--ink)">${ing.name}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--ink3)">${ing.qty} ${ing.unit}</div>
+        </div>`).join('')}
+    </div>
+    <!-- Steps -->
+    <div class="sh">Preparation Steps</div>
+    <div class="card cp">
+      ${r.steps.map((s,i) => `
+        <div style="display:flex;gap:12px;margin-bottom:${i<r.steps.length-1?'14px':'0'}">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${i+1}</div>
+          <div style="font-size:14px;color:var(--ink2);line-height:1.5;flex:1">${s}</div>
+        </div>`).join('')}
+    </div>
+    <div style="padding:12px 16px 24px">
+      <button onclick="addRecipeToWeekPlan('${r.id}')" style="width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--r);padding:16px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer">＋ Add to Week Plan</button>
+    </div>
+  `;
+  goTo('e-recipe-detail');
+}
+
+function deleteRecipe(id) {
+  cookbook = cookbook.filter(r => r.id !== id);
+  Object.keys(weekPlan).forEach(d => {
+    const e = weekPlan[d];
+    if (e && (e === id || (typeof e === 'object' && e.recipeId === id))) weekPlan[d] = null;
+  });
+  db.deleteRecipe(id).catch(e => console.warn('Delete recipe error:', e));
+  renderCookbook();
+  renderWeekIngredients();
+  toast('Recipe removed from cookbook');
+}
+
+function uploadHeroPhoto(event, recipeId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const r = cookbook.find(x => x.id === recipeId);
+    if (!r) return;
+    r.heroImg = e.target.result;  // preview immediately
+    renderCookbook();
+
+    // Upload to Supabase Storage
+    const path = `recipe-${r.id}-${Date.now()}`;
+    uploadPhoto('recipe-photos', path, e.target.result)
+      .then(url => {
+        r.heroImg = url;  // replace data URL with CDN URL
+        db.updateRecipe(r.id, { hero_img_url: url });
+        renderCookbook();
+      })
+      .catch(err => console.warn('Hero upload error:', err));
+
+    toast('📷 Photo saved to "' + r.name + '"');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══════════════════════════════════════════════════
+// RECIPE JSON IMPORT
+// ══════════════════════════════════════════════════
+
+function showRecipeHelp() {
+  openModal('recipeHelpModal');
+}
+
+function importRecipeJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('import-status');
+  statusEl.style.color = 'var(--blue)';
+  statusEl.textContent = 'Reading file…';
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+
+      // Validate it's a Domestic Harmony recipe file
+      if (!data.domestic_harmony_recipe) {
+        throw new Error('Not a valid Domestic Harmony recipe file. Please extract the recipe using Claude first.');
+      }
+      if (!data.name || !data.ingredients || !data.steps) {
+        throw new Error('Recipe file is missing required fields (name, ingredients, or steps).');
+      }
+
+      // Check for duplicate
+      if (cookbook.find(r => r.source_url === data.source_url && data.source_url)) {
+        throw new Error(`"${data.name}" is already in your cookbook.`);
+      }
+
+      // Build cookbook entry from the JSON schema
+      const recipe = {
+        id: 'r' + nextRecipeId++,
+        name:         data.name,
+        emoji:        data.emoji || guessEmoji(data.name),
+        url:          data.source_url || '',
+        sourceCredit: data.source_credit || '',
+        time:         data.timing ? (data.timing.total_minutes + ' min') : '—',
+        servings:     data.base_servings || 4,
+        cat:          data.category || 'Mains',
+        desc:         data.description || '',
+        // Store raw ingredients with numeric qty for scaling
+        ingredients:  data.ingredients.map(ing => ({
+          name:  ing.name,
+          qty:   String(ing.qty),
+          unit:  ing.unit,
+          group: ing.group || 'main',
+          note:  ing.note || ''
+        })),
+        steps: data.steps.map(s => typeof s === 'string' ? s : s.instruction),
+        notes: data.notes || [],
+        // Keep base_servings for pax scaling
+        base_servings: data.base_servings || 4,
+      };
+
+      // Save to Supabase
+      db.insertRecipe({
+        id:           recipe.id,
+        name:         recipe.name,
+        emoji:        recipe.emoji,
+        category:     recipe.cat,
+        description:  recipe.desc,
+        source_url:   recipe.url,
+        source_credit:recipe.sourceCredit,
+        cook_time:    recipe.time,
+        base_servings:recipe.base_servings,
+        ingredients:  recipe.ingredients,
+        steps:        recipe.steps,
+        notes:        recipe.notes || [],
+      }).then(saved => {
+        if (saved) { recipe.id = saved.id; }
+        cookbook.push(recipe);
+        renderCookbook();
+      }).catch(() => {
+        // If DB write fails, still add locally
+        cookbook.push(recipe);
+        renderCookbook();
+      });
+      statusEl.style.color = 'var(--green)';
+      statusEl.textContent = `✅ "${recipe.name}" added to cookbook!`;
+      input.value = '';
+      toast(`✅ "${recipe.name}" imported successfully`);
+    } catch(err) {
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = '⚠️ ' + err.message;
+      toast('Import failed: ' + err.message.substring(0, 50));
+    }
+  };
+  reader.onerror = () => {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = '⚠️ Could not read the file.';
+  };
+  reader.readAsText(file);
+}
+
+// Emoji guesser based on recipe name keywords
+function guessEmoji(name) {
+  const n = (name || '').toLowerCase();
+  if (n.includes('chicken') || n.includes('ayam')) return '🍗';
+  if (n.includes('beef') || n.includes('steak') || n.includes('rendang') || n.includes('bolognese') || n.includes('bolo')) return '🥩';
+  if (n.includes('pork') || n.includes('babi')) return '🥓';
+  if (n.includes('fish') || n.includes('ikan') || n.includes('salmon')) return '🐟';
+  if (n.includes('prawn') || n.includes('shrimp') || n.includes('udang')) return '🦐';
+  if (n.includes('pasta') || n.includes('spaghetti') || n.includes('carbonara') || n.includes('lasagna') || n.includes('penne')) return '🍝';
+  if (n.includes('rice') || n.includes('nasi') || n.includes('fried rice')) return '🍚';
+  if (n.includes('noodle') || n.includes('mee') || n.includes('laksa') || n.includes('ramen') || n.includes('kway teow')) return '🍜';
+  if (n.includes('soup') || n.includes('stew')) return '🍲';
+  if (n.includes('curry') || n.includes('kari')) return '🍛';
+  if (n.includes('salad')) return '🥗';
+  if (n.includes('cake') || n.includes('dessert') || n.includes('cookie')) return '🎂';
+  if (n.includes('egg') || n.includes('omelette')) return '🍳';
+  return '🍽️';
+}
+
+// ══════════════════════════════════════════════════
+// PAX PICKER & INGREDIENT SCALING
+// ══════════════════════════════════════════════════
+let paxRecipeId  = null;
+let paxCount     = 4;
+
+function openPaxPicker(recipeId) {
+  const r = cookbook.find(x => x.id === recipeId);
+  if (!r) return;
+  paxRecipeId = recipeId;
+  paxCount    = r.base_servings || r.servings || 4;
+
+  document.getElementById('pax-recipe-name').textContent = r.emoji + ' ' + r.name;
+  document.getElementById('pax-base').textContent = r.base_servings || r.servings || 4;
+  document.getElementById('pax-count').textContent = paxCount;
+
+  // Pre-select first empty day
+  const emptyDay = MEAL_DAYS.find(d => !weekPlan[d]) || 'Mon';
+  document.getElementById('pax-day-select').value = emptyDay;
+
+  renderPaxPreview(r);
+  openModal('paxModal');
+}
+
+function changePax(dir) {
+  paxCount = Math.max(1, Math.min(20, paxCount + dir));
+  document.getElementById('pax-count').textContent = paxCount;
+  const r = cookbook.find(x => x.id === paxRecipeId);
+  if (r) renderPaxPreview(r);
+}
+
+function scaleIngredients(ingredients, baseServings, targetPax) {
+  const ratio = targetPax / (baseServings || targetPax);
+  return ingredients.map(ing => {
+    const rawQty = parseFloat(ing.qty);
+    if (isNaN(rawQty)) return ing; // non-numeric like "to taste"
+    const scaled = rawQty * ratio;
+    // Format: integers stay integers, decimals rounded to 1dp
+    const formatted = scaled % 1 === 0 ? String(parseInt(scaled)) : scaled.toFixed(1);
+    return { ...ing, qty: formatted, scaledQty: parseFloat(formatted) };
+  });
+}
+
+function renderPaxPreview(r) {
+  const base   = r.base_servings || r.servings || 4;
+  const scaled = scaleIngredients(r.ingredients, base, paxCount);
+  const el     = document.getElementById('pax-scaled-preview');
+  if (!el) return;
+  el.innerHTML = '<div style="font-weight:800;color:var(--ink);margin-bottom:8px;font-size:12px;text-transform:uppercase;letter-spacing:.5px">Scaled ingredients for ' + paxCount + ' people:</div>' +
+    scaled.map(ing =>
+      `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)">
+        <span style="font-size:12px;color:var(--ink)">${ing.name}${ing.note ? ' <em style=color:var(--ink3)>(' + ing.note + ')</em>' : ''}</span>
+        <span style="font-size:12px;font-weight:700;color:var(--ink2);white-space:nowrap;margin-left:8px">${ing.qty} ${ing.unit}</span>
+      </div>`
+    ).join('');
+}
+
+function confirmAddWithPax() {
+  const r = cookbook.find(x => x.id === paxRecipeId);
+  if (!r) return;
+  const day = document.getElementById('pax-day-select').value;
+
+  // Store with scaling metadata so ingredient list is always correct
+  const scaled = scaleIngredients(r.ingredients, r.base_servings || r.servings || 4, paxCount);
+  weekPlan[day] = { recipeId: r.id, pax: paxCount, scaled };
+
+  // Persist to Supabase
+  db.upsertWeekPlan({
+    week_start: currentWeekStart(),
+    day_key: day,
+    recipe_id: r.id,
+    pax: paxCount,
+    scaled_ingredients: scaled,
+    released: false,
+  }).catch(e => console.warn('Week plan sync error:', e));
+
+  closeModal('paxModal');
+  mealTab('weekplan');
+  goTo('e-meals');
+  toast(`✅ "${r.name}" for ${paxCount} pax added to ${MEAL_DAY_LABELS[day]}`);
+}
+
+
+function confirmAddToCookbook() { /* replaced by importRecipeJSON */ }
+
+function openAddRecipeModal() {
+  showRecipeHelp();
+}
+
+// ══════════════════════════════════════════════════
+// WEEK PLAN (Employer)
+// ══════════════════════════════════════════════════
+function addRecipeToWeekPlan(recipeId) {
+  // Opens pax picker — user chooses servings and day before confirming
+  openPaxPicker(recipeId);
+}
+
+function renderWeekPlan() {
+  const grid = document.getElementById('weekplan-grid');
+  if (!grid) return;
+
+  grid.innerHTML = MEAL_DAYS.map(day => {
+    const entry = weekPlan[day];
+    const rId   = entry ? (typeof entry === 'string' ? entry : entry.recipeId) : null;
+    const pax   = entry && typeof entry === 'object' ? entry.pax : null;
+    const r     = rId ? cookbook.find(x => x.id === rId) : null;
+
+    if (r) {
+      // ── ASSIGNED: green border, tick, recipe info, remove button ──
+      const heroImg = r.heroImg
+        ? `<img src="${r.heroImg}" style="width:60px;height:60px;object-fit:cover;border-radius:14px;flex-shrink:0"/>`
+        : `<div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#ECFDF5,#D1FAE5);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${r.emoji}</div>`;
+      return `
+        <div style="margin:0 16px 10px;border-radius:18px;overflow:hidden;border:2.5px solid var(--green);background:var(--white);box-shadow:0 2px 12px rgba(5,150,105,.12)">
+          <!-- Green header bar -->
+          <div style="background:var(--green);padding:6px 14px;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:11px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.6px">${MEAL_DAY_LABELS[day]}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.85)">✓ Meal assigned</span>
+              <button onclick="removeMealFromPlan('${day}')" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:20px;padding:3px 10px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">Remove</button>
+            </div>
+          </div>
+          <!-- Recipe row -->
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px">
+            ${heroImg}
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:var(--ink)">${r.name}</div>
+              <div style="font-size:12px;color:var(--ink3);margin-top:3px">⏱ ${r.time} · ${r.ingredients.length} ingredients</div>
+              ${pax ? `<div style="margin-top:5px;display:inline-flex;align-items:center;gap:4px;background:var(--green-l);border:1px solid var(--green-m);border-radius:20px;padding:2px 10px;font-size:12px;font-weight:800;color:var(--green)">👥 ${pax} pax</div>` : ''}
+            </div>
+          </div>
+        </div>`;
+    } else {
+      // ── EMPTY: red border, clear "no meal" label, single assign button ──
+      return `
+        <div style="margin:0 16px 10px;border-radius:18px;overflow:hidden;border:2.5px solid var(--red-m);background:var(--red-l);box-shadow:0 2px 8px rgba(220,38,38,.08)">
+          <!-- Red header bar -->
+          <div style="background:var(--red-m);padding:6px 14px;display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:11px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.6px">${MEAL_DAY_LABELS[day]}</div>
+            <span style="font-size:11px;font-weight:700;color:var(--red)">✕ No meal set</span>
+          </div>
+          <!-- Action area -->
+          <div style="padding:14px 14px">
+            ${cookbook.length
+              ? `<button onclick="openPaxPickerForDay('${day}')" style="width:100%;padding:12px;border:2px dashed var(--red-m);border-radius:12px;background:var(--white);color:var(--red);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">＋ Assign a meal from cookbook</button>`
+              : `<div style="text-align:center;font-size:13px;color:var(--red);font-weight:600;opacity:.7">Add recipes to your cookbook first</div>`}
+          </div>
+        </div>`;
+    }
+  }).join('');
+
+  renderWeekIngredients();
+}
+
+function assignMeal(day, recipeId) {
+  // Called when recipe is chosen from the picker inside pax modal
+  paxRecipeId = recipeId;
+  const r = cookbook.find(x => x.id === recipeId);
+  if (!r) return;
+  paxCount = r.base_servings || r.servings || 4;
+  document.getElementById('pax-recipe-name').textContent = r.emoji + ' ' + r.name;
+  document.getElementById('pax-base').textContent = r.base_servings || r.servings || 4;
+  document.getElementById('pax-count').textContent = paxCount;
+  document.getElementById('pax-day-select').value = day;
+  renderPaxPreview(r);
+  // Re-render recipe picker section hidden now we have a selection
+  const picker = document.getElementById('pax-recipe-picker');
+  if (picker) picker.style.display = 'none';
+  const preview = document.getElementById('pax-scaled-preview');
+  if (preview) preview.style.display = 'block';
+  document.getElementById('pax-confirm-btn').style.display = 'block';
+}
+
+function openPaxPickerForDay(day) {
+  // Opens a fresh pax modal with recipe picker, no recipe pre-selected
+  paxRecipeId = null;
+  paxCount    = 4;
+  document.getElementById('pax-recipe-name').textContent = 'Select a recipe below';
+  document.getElementById('pax-base').textContent = '—';
+  document.getElementById('pax-count').textContent = paxCount;
+  document.getElementById('pax-day-select').value = day;
+
+  // Show recipe picker, hide preview until recipe chosen
+  const picker = document.getElementById('pax-recipe-picker');
+  if (picker) {
+    picker.innerHTML = cookbook.map(r =>
+      `<button onclick="assignMeal('${day}','${r.id}')" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 4px;border:none;background:none;cursor:pointer;font-family:inherit;text-align:left;border-bottom:1px solid var(--line)">
+        <span style="font-size:22px">${r.emoji}</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink)">${r.name}</div>
+          <div style="font-size:11px;color:var(--ink3)">⏱ ${r.time} · serves ${r.base_servings||r.servings||'?'}</div>
+        </div>
+      </button>`
+    ).join('');
+    picker.style.display = 'block';
+  }
+  const preview = document.getElementById('pax-scaled-preview');
+  if (preview) preview.style.display = 'none';
+  document.getElementById('pax-confirm-btn').style.display = 'none';
+  openModal('paxModal');
+}
+
+function removeMealFromPlan(day) {
+  weekPlan[day] = null;
+  db.deleteWeekPlanDay(currentWeekStart(), day).catch(e => console.warn('Remove meal error:', e));
+  renderWeekPlan();
+  renderWeekIngredients();
+  toast('Meal removed from ' + MEAL_DAY_LABELS[day]);
+}
+
+// ══════════════════════════════════════════════════
+// CONSOLIDATED INGREDIENT LIST (dynamic)
+// ══════════════════════════════════════════════════
+function buildIngredientList() {
+  // Merge all ingredients from all assigned meals, sum duplicates.
+  // Uses scaled ingredients if pax was set, otherwise base recipe quantities.
+  const merged = {};
+  MEAL_DAYS.forEach(day => {
+    const entry = weekPlan[day];
+    if (!entry) return;
+    const rId  = typeof entry === 'string' ? entry : entry.recipeId;
+    const ings = (entry.scaled) ? entry.scaled
+               : (() => { const r = cookbook.find(x => x.id === rId); return r ? r.ingredients : []; })();
+
+    ings.forEach(ing => {
+      const key  = ing.name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      const qty  = parseFloat(ing.qty) || 0;
+      if (merged[key] && merged[key].unit === ing.unit) {
+        merged[key].qty = String((parseFloat(merged[key].qty) + qty).toFixed(2).replace(/\.?0+$/, ''));
+      } else if (merged[key]) {
+        // Different unit — separate entry
+        const key2 = key + '_' + ing.unit.replace(/[^a-z]/g,'');
+        if (!merged[key2]) merged[key2] = {name:ing.name, qty:String(qty), unit:ing.unit, key:key2};
+        else merged[key2].qty = String((parseFloat(merged[key2].qty)+qty).toFixed(2).replace(/\.?0+$/,''));
+      } else {
+        merged[key] = {name:ing.name, qty:String(qty), unit:ing.unit, key};
+      }
+    });
+  });
+  return Object.values(merged);
+}
+
+function renderWeekIngredients() {
+  const items = buildIngredientList();
+  const badge = document.getElementById('ingr-count-badge');
+  if (badge) badge.textContent = items.length + ' items';
+
+  const chips = document.getElementById('ingr-summary-chips');
+  if (chips) {
+    const assignedRecipes = MEAL_DAYS.filter(d=>weekPlan[d]).map(d=>{const e=weekPlan[d];const id=typeof e==='string'?e:e.recipeId;return cookbook.find(r=>r.id===id);}).filter(Boolean);
+    chips.innerHTML = assignedRecipes.map(r=>`<span class="chip cb">${r.emoji} ${r.name}</span>`).join('');
+  }
+
+  const card = document.getElementById('ingr-list-card');
+  if (!card) return;
+  if (!items.length) {
+    card.innerHTML = '<div style="padding:16px;font-size:13px;color:var(--ink3)">Assign meals to days to generate the ingredient list.</div>';
+    return;
+  }
+  card.innerHTML = items.map((ing,i) => `
+    <div style="display:flex;align-items:center;padding:12px 16px;border-bottom:${i<items.length-1?'1px solid var(--line)':'none'}">
+      <div style="flex:1;font-size:14px;font-weight:600;color:var(--ink)">${ing.name}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink3)">${parseFloat(ing.qty) % 1 === 0 ? parseInt(ing.qty) : parseFloat(ing.qty).toFixed(1)} ${ing.unit}</div>
+    </div>`).join('');
+}
+
+function releaseWeekPlan() {
+  const assigned = MEAL_DAYS.filter(d => weekPlan[d]).length;
+  if (!assigned) { toast('Assign at least one meal to release the plan'); return; }
+  weekPlanReleased = true;
+
+  // Build grocery state from week plan
+  const items = buildIngredientList();
+  fdwGroceryState = {};
+  items.forEach(ing => {
+    fdwGroceryState[ing.key] = {
+      key: ing.key,                          // ← must store key inside value for DOM lookups
+      name:ing.name, baseQty:parseFloat(ing.qty),
+      adjustedQty:parseFloat(ing.qty), unit:ing.unit, status:'need',
+    };
+  });
+
+  // Notify FDW
+  const mealNames = MEAL_DAYS.filter(d=>weekPlan[d])
+    .map(d=>cookbook.find(r=>r.id===weekPlan[d])?.name).filter(Boolean).join(', ');
+  addNotification('fdw', {
+    type:'meal-plan', icon:'🍽️',
+    text:`New meal plan released: ${mealNames}. Please check the ingredient list.`,
+    cta:'View Ingredient List', ctaFn:"fNav('grocery',null)"
+  });
+
+  // Mark all week plan rows as released in DB
+  const wStart = currentWeekStart();
+  MEAL_DAYS.forEach(d => {
+    if (weekPlan[d]) {
+      db.upsertWeekPlan({
+        week_start: wStart, day_key: d,
+        recipe_id: weekPlan[d].recipeId, pax: weekPlan[d].pax,
+        scaled_ingredients: weekPlan[d].scaled, released: true,
+        released_at: new Date().toISOString(),
+      }).catch(e => console.warn('Release plan error:', e));
+    }
+  });
+
+  // Write grocery items to DB
+  const groceryItems = buildIngredientList();
+  groceryItems.forEach(ing => {
+    db.upsertGroceryItem({
+      week_start: wStart, item_key: ing.key,
+      name: ing.name, base_qty: parseFloat(ing.qty),
+      adjusted_qty: parseFloat(ing.qty), unit: ing.unit, status: 'need',
+    }).catch(e => console.warn('Grocery item sync error:', e));
+  });
+
+  // Add notification to DB
+  db.addNotification({
+    for_role: 'helper', type: 'meal-plan', icon: '🍽️',
+    message: `New meal plan released: ${mealNames}. Please check the ingredient list.`,
+    cta_label: 'View Ingredient List', cta_action: "fNav('grocery',null)",
+  }).catch(e => console.warn('Notif error:', e));
+
+  renderFdwNotifications();
+  toast('✅ Week plan sent to Maria! She has been notified.');
+  // Grocery task will now auto-appear in her daily tasks
+  renderFdwSchedule();
+}
+
+// ══════════════════════════════════════════════════
+// FDW GROCERY — DYNAMIC FROM WEEK PLAN
+// ══════════════════════════════════════════════════
+function renderFdwGrocery() {
+  // Sync submitted banner state
+  const banner = document.getElementById('grocery-submitted-banner');
+  const sbtn   = document.getElementById('grocery-submit-btn');
+  if (banner) banner.style.display = grocerySystemTask.grocerySubmitted ? 'block' : 'none';
+  if (sbtn) {
+    sbtn.disabled = grocerySystemTask.grocerySubmitted;
+    sbtn.textContent = grocerySystemTask.grocerySubmitted ? '✓ List Submitted' : '✉️ Submit List to Employer';
+    sbtn.style.background = grocerySystemTask.grocerySubmitted ? 'var(--green-m)' : '';
+    sbtn.style.color = grocerySystemTask.grocerySubmitted ? 'var(--green)' : '';
+  }
+  // Meal chips
+  const chips = document.getElementById('fdw-meal-chips');
+  if (chips) {
+    const assignedRecipes = MEAL_DAYS.filter(d=>weekPlan[d]).map(d=>{const e=weekPlan[d];const id=typeof e==='string'?e:e.recipeId;return cookbook.find(r=>r.id===id);}).filter(Boolean);
+    chips.innerHTML = assignedRecipes.length
+      ? assignedRecipes.map(r=>`<span class="chip cb">${r.emoji} ${r.name}</span>`).join('')
+      : '<span style="font-size:13px;color:var(--ink3)">No week plan released yet</span>';
+  }
+
+  const lbl = document.getElementById('fdw-ingr-summary-lbl');
+  const listEl = document.getElementById('fdw-grocery-list');
+  if (!listEl) return;
+
+  if (!weekPlanReleased || !Object.keys(fdwGroceryState).length) {
+    if (lbl) lbl.textContent = 'No meal plan released yet';
+    listEl.innerHTML = `<div style="padding:20px;text-align:center;font-size:13px;color:var(--ink3)">Your employer hasn't released this week's meal plan yet.</div>`;
+    updateFdwGSummary();
+    return;
+  }
+
+  const items = Object.values(fdwGroceryState);
+  if (lbl) lbl.textContent = Object.keys(weekPlan).filter(d=>weekPlan[d]).length + ' recipes · ' + items.length + ' ingredients to check';
+
+  listEl.innerHTML = items.map((item,i) => {
+    const isHave = item.status === 'have';
+    return `<div style="padding:13px 16px;border-bottom:${i<items.length-1?'1px solid var(--line)':'none'}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="flex:1;font-size:14px;font-weight:700;color:var(--ink)">${item.name}</div>
+        <div style="display:flex;border-radius:20px;overflow:hidden;border:1.5px solid var(--line)">
+          <button id="tgl-need-${item.key}" onclick="fdwGToggle('${item.key}','need')" style="padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;border:none;border-radius:20px 0 0 20px;background:${!isHave?'var(--red)':'transparent'};color:${!isHave?'#fff':'var(--red)'};font-family:inherit;transition:all .15s">Need</button>
+          <button id="tgl-have-${item.key}" onclick="fdwGToggle('${item.key}','have')" style="padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;border:none;border-radius:0 20px 20px 0;background:${isHave?'var(--green)':'transparent'};color:${isHave?'#fff':'var(--green)'};font-family:inherit;transition:all .15s">Have</button>
+        </div>
+      </div>
+      <!-- Quantity adjuster -->
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:10px;padding:8px 12px">
+        <div style="font-size:12px;color:var(--ink3);flex:1">Quantity needed:</div>
+        <button onclick="adjustQty('${item.key}',-1)" style="width:32px;height:32px;border-radius:8px;background:var(--white);border:1.5px solid var(--line);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);flex-shrink:0">−</button>
+        <div style="font-size:14px;font-weight:800;color:var(--ink);min-width:60px;text-align:center;flex:1" id="qty-display-${item.key}">${formatQty(item.adjustedQty)} ${item.unit}</div>
+        <button onclick="adjustQty('${item.key}',1)" style="width:32px;height:32px;border-radius:8px;background:var(--white);border:1.5px solid var(--line);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);flex-shrink:0">+</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateFdwGSummary();
+}
+
+function formatQty(n) {
+  return n % 1 === 0 ? parseInt(n) : n.toFixed(1);
+}
+
+function fdwGToggle(key, status) {
+  const item = fdwGroceryState[key];
+  if (!item) return;
+  item.status = status;
+  // Update just the two toggle buttons without re-rendering the whole list
+  const needBtn = document.getElementById('tgl-need-' + key);
+  const haveBtn = document.getElementById('tgl-have-' + key);
+  if (needBtn) {
+    needBtn.style.background = status==='need' ? 'var(--red)' : 'transparent';
+    needBtn.style.color = status==='need' ? '#fff' : 'var(--red)';
+  }
+  if (haveBtn) {
+    haveBtn.style.background = status==='have' ? 'var(--green)' : 'transparent';
+    haveBtn.style.color = status==='have' ? '#fff' : 'var(--green)';
+  }
+  // Persist to DB
+  db.upsertGroceryItem({
+    week_start: currentWeekStart(),
+    item_key: key,
+    name: item.name,
+    base_qty: item.baseQty,
+    adjusted_qty: item.adjustedQty,
+    unit: item.unit,
+    status: status,
+  }).catch(e => console.warn('Grocery toggle sync error:', e));
+
+  updateFdwGSummary();
+}
+
+function adjustQty(key, dir) {
+  const item = fdwGroceryState[key];
+  if (!item) return;
+  // Determine step size based on unit
+  const bigUnits = ['g','ml','L','kg'];
+  const step = bigUnits.includes(item.unit) ? 50 : 1;
+  item.adjustedQty = Math.max(0, item.adjustedQty + (dir * step));
+  const el = document.getElementById('qty-display-' + key);
+  if (el) el.textContent = formatQty(item.adjustedQty) + ' ' + item.unit;
+
+  // Persist to DB (debounced)
+  clearTimeout(item._qtyTimer);
+  item._qtyTimer = setTimeout(() => {
+    db.upsertGroceryItem({
+      week_start: currentWeekStart(),
+      item_key: key,
+      name: item.name,
+      base_qty: item.baseQty,
+      adjusted_qty: item.adjustedQty,
+      unit: item.unit,
+      status: item.status,
+    }).catch(e => console.warn('Qty sync error:', e));
+  }, 800);
+}
+
+function updateFdwGSummary() {
+  const items = Object.values(fdwGroceryState);
+  const need = items.filter(i=>i.status==='need').length;
+  const have = items.filter(i=>i.status==='have').length;
+  const el = document.getElementById('fdw-gsummary');
+  if (el) el.textContent = items.length ? need + ' to buy · ' + have + ' in stock' : '—';
+}
+
+function submitGrocery() {
+  if (!weekPlanReleased) { toast('No meal plan to submit yet'); return; }
+  const needItems = Object.values(fdwGroceryState).filter(i=>i.status==='need');
+  const haveItems = Object.values(fdwGroceryState).filter(i=>i.status==='have');
+
+  // Mark grocery task as submitted so FDW can now complete it
+  grocerySystemTask.grocerySubmitted = true;
+  grocerySystemTask.petPeeves.forEach(pp => pp.confirmed = false);
+
+  // Write to DB
+  db.submitGrocery(currentWeekStart()).catch(e => console.warn('Submit grocery error:', e));
+
+  // Add notification to employer
+  addNotification('employer', {
+    type:'grocery', icon:'🛒',
+    text:`Maria submitted the shopping list: ${needItems.length} to buy, ${haveItems.length} in stock.`,
+    cta:'Review & Approve', ctaFn:'openGroceryApproval()'
+  });
+  renderEmployerNotifications();
+  toast(`📨 List submitted! ${needItems.length} items to buy. Return to tasks to complete the grocery task.`);
+
+  // Show submitted banner in grocery screen
+  const banner = document.getElementById('grocery-submitted-banner');
+  const btn = document.getElementById('grocery-submit-btn');
+  if (banner) banner.style.display = 'block';
+  if (btn) { btn.textContent = '✓ List Submitted'; btn.style.background = 'var(--green-m)'; btn.style.color = 'var(--green)'; btn.disabled = true; }
+  // Route back to tasks after short delay so FDW can mark task complete
+  setTimeout(() => {
+    fNav('schedule', null);
+    renderFdwSchedule();
+  }, 1800);
+}
+
+function addNotification(role, data) {
+  const n = { id:notifId++, timestamp: new Date(), ...data };
+  notifications[role].unshift(n);
+  // Also write to DB for cross-device delivery
+  db.addNotification({
+    for_role: role === 'employer' ? 'employer' : 'helper',
+    type: data.type || 'info',
+    icon: data.icon || '🔔',
+    message: data.text,
+    cta_label: data.cta,
+    cta_action: data.ctaFn,
+  }).catch(e => console.warn('Notif write error:', e));
+}
+
+function renderEmployerNotifications() {
+  const el = document.getElementById('employer-notifications');
+  if (!el) return;
+  const notifs = notifications.employer;
+  if (!notifs.length) { el.innerHTML=''; return; }
+  el.innerHTML = notifs.map(n => `
+    <div style="margin:12px 16px 0;background:var(--amber-l);border:1.5px solid #FCD34D;border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start">
+      <div style="font-size:24px;flex-shrink:0">${n.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);line-height:1.4;margin-bottom:8px">${n.text}</div>
+        <button onclick="${n.ctaFn}" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">${n.cta}</button>
+      </div>
+      <button onclick="dismissNotif('employer',${n.id})" style="font-size:16px;color:var(--ink3);background:none;border:none;cursor:pointer;flex-shrink:0;padding:0">✕</button>
+    </div>`).join('');
+}
+
+function renderFdwNotifications() {
+  const el = document.getElementById('fdw-plan-banner'); // repurposed from removed home screen
+  if (!el) return;
+  const notifs = notifications.fdw;
+  if (!notifs.length) { el.innerHTML=''; return; }
+  el.innerHTML = notifs.map(n => `
+    <div style="margin:0 16px 10px;background:var(--green-l);border:1.5px solid var(--green-m);border-radius:18px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start">
+      <div style="font-size:24px;flex-shrink:0">${n.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);line-height:1.4;margin-bottom:8px">${n.text}</div>
+        <button onclick="${n.ctaFn};dismissNotif('fdw',${n.id});renderFdwNotifications()" style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">${n.cta}</button>
+      </div>
+      <button onclick="dismissNotif('fdw',${n.id});renderFdwNotifications()" style="font-size:16px;color:var(--ink3);background:none;border:none;cursor:pointer;flex-shrink:0;padding:0">✕</button>
+    </div>`).join('');
+}
+
+function dismissNotif(role, id) {
+  notifications[role] = notifications[role].filter(n=>n.id!==id);
+  db.dismissNotif(id).catch(e => console.warn('Dismiss notif error:', e));
+  if (role==='employer') renderEmployerNotifications();
+  else renderFdwNotifications();
+}
+
+function openGroceryApproval() {
+  const needItems = Object.values(fdwGroceryState).filter(i=>i.status==='need');
+  const haveItems = Object.values(fdwGroceryState).filter(i=>i.status==='have');
+  const listHtml = [
+    needItems.length ? `<div style="font-size:12px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 6px">To Buy (${needItems.length})</div>` + needItems.map(i=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px"><span style="color:var(--ink);font-weight:600">${i.name}</span><span style="color:var(--ink3)">${formatQty(i.adjustedQty)} ${i.unit}</span></div>`).join('') : '',
+    haveItems.length ? `<div style="font-size:12px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 6px">In Stock (${haveItems.length})</div>` + haveItems.map(i=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;opacity:.6"><span style="color:var(--ink)">${i.name}</span><span style="color:var(--ink3)">${formatQty(i.adjustedQty)} ${i.unit} ✓</span></div>`).join('') : '',
+  ].join('');
+  document.getElementById('approval-list-content').innerHTML = listHtml;
+  openModal('groceryApprovalModal');
+}
+
+function approveGroceryList() {
+  closeModal('groceryApprovalModal');
+  // Clear the grocery notification from employer
+  notifications.employer = notifications.employer.filter(n=>n.type!=='grocery');
+  renderEmployerNotifications();
+  // Approve in DB
+  db.approveGrocery(currentWeekStart()).catch(e => console.warn('Approve grocery error:', e));
+
+  // Copy list to clipboard for offline ordering
+  const items = Object.values(fdwGroceryState).filter(i=>i.status==='need').map(i=>i.name+' ('+formatQty(i.adjustedQty)+' '+i.unit+')').join('\n');
+  try { navigator.clipboard.writeText(items||''); } catch(e){}
+  // Notify FDW that it was approved
+  addNotification('fdw', {
+    type:'approval', icon:'✅',
+    text:'Your shopping list was approved! Employer will arrange the order.',
+    cta:'View List', ctaFn:"fNav('grocery',null)"
+  });
+  renderFdwNotifications();
+  toast('✅ List approved and copied to clipboard for ordering');
+}
+
+// legacy grocery render kept for safety (no-op now)
+function renderGroceryList() { renderFdwGrocery(); }
+function etog(btn) {
+  const row = btn.closest('.gtog');
+  row.querySelectorAll('.gb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+// ══════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('on'); }
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => t.classList.remove('on'), 2800);
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+// INIT — check for existing session, else show login
+// ══════════════════════════════════════════════════
+
+// Preview mode: bypass login, use in-memory data only
+function devBypass() {
+  currentRole = 'employer';
+  hideLoginScreen();
+  applyAllRecurring();
+  renderTaskLibrary();
+  renderWeeklyOverview();
+  renderCookbook();
+  renderTrackerHome();
+  renderEmployerNotifications();
+  renderFdwGrocery();
+  goTo('e-home');
+}
+
+(async function init() {
+  try {
+    const { data: { session } } = await _sb.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      currentRole = session.user.user_metadata?.role || 'helper';
+      hideLoginScreen();
+      await loadAllData();
+      applyAllRecurring();
+      setupRealtime();
+      setRoleUI(currentRole);
+    } else {
+      showLoginScreen();
+    }
+  } catch(e) {
+    console.warn('Supabase init error:', e.message);
+    showLoginScreen();
+  }
+})();
+</script>
+</body>
+</html>
