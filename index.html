@@ -42,7 +42,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#94A3B8;min-height:10
 /* SCREENS */
 .sc{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;background:var(--bg);scrollbar-width:none}
 .sc::-webkit-scrollbar{display:none}
-.sc.on{display:block}
+.sc.on{display:flex;flex-direction:column}
 
 /* TOP BAR */
 .tbar{background:var(--white);padding:14px 20px 12px;position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line)}
@@ -52,7 +52,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#94A3B8;min-height:10
 .icon-btn{width:38px;height:38px;border-radius:50%;background:var(--bg);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
 
 /* BOTTOM NAV */
-.bnav{position:sticky;bottom:0;left:0;right:0;background:var(--white);border-top:1.5px solid var(--line);display:flex;z-index:50;flex-shrink:0}
+.bnav{position:sticky;bottom:0;background:var(--white);border-top:1.5px solid var(--line);display:flex;z-index:50}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 10px;gap:2px;border:none;background:none;cursor:pointer;transition:all .2s}
 .ni-ic{font-size:20px;line-height:1;width:44px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:20px;transition:background .2s}
 .ni-lb{font-size:9px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px}
@@ -263,10 +263,10 @@ textarea.notes-ta:focus{border-color:var(--blue)}
 .modal-bg.on .modal-sheet{transform:translateY(0)}
 .modal-title{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:16px}
 .modal-lbl{font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:6px;margin-top:4px}
-input.mi{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;margin-bottom:4px}
+input.mi{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:16px;color:var(--ink);outline:none;margin-bottom:4px}
 input.mi:focus{border-color:var(--blue)}
-select.mi{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;margin-bottom:4px;background:var(--white);appearance:none}
-textarea.mi{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:14px;color:var(--ink);resize:none;height:76px;outline:none;margin-bottom:4px}
+select.mi{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:16px;color:var(--ink);outline:none;margin-bottom:4px;background:var(--white);appearance:none}
+textarea.mi{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:16px;color:var(--ink);resize:none;height:80px;outline:none;margin-bottom:4px}
 textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
 .img-pick-lbl{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;border:2px dashed var(--blue-m);border-radius:12px;padding:18px;cursor:pointer;background:var(--blue-l);color:var(--blue);font-size:13px;font-weight:700;margin-bottom:8px}
 .img-preview{width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-bottom:8px;display:none;background:#f1f5f9;cursor:pointer}
@@ -346,6 +346,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
     <div class="sh">Task Status</div>
     <div id="tracker-task-list" style="padding-top:4px"></div>
     <div style="height:8px"></div>
+    <div style="flex:1;min-height:0"></div>
     <nav class="bnav"><button class="ni on" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
   </div>
 
@@ -363,6 +364,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
     <div style="height:12px"></div>
     <div id="task-library-container"></div>
     <div style="height:16px"></div>
+    <div style="flex:1;min-height:0"></div>
     <nav class="bnav"><button class="ni" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni on" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
   </div>
 
@@ -385,6 +387,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
     <div class="sh">Week of Mar 23–29 <span style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:none;letter-spacing:0">Tap any day to manage it</span></div>
     <div id="weekly-overview-grid"></div>
     <div style="height:16px"></div>
+    <div style="flex:1;min-height:0"></div>
     <nav class="bnav"><button class="ni" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni on" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
   </div>
 
@@ -411,6 +414,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
     <div class="sh">Task Pool <span class="chip cb" id="pool-count-badge">4 Available</span></div>
     <div class="pool-grid" id="pool-grid"></div>
     <div style="height:16px"></div>
+    <div style="flex:1;min-height:0"></div>
     <nav class="bnav"><button class="ni" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni on" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
   </div>
 
@@ -461,6 +465,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
       <button onclick="releaseWeekPlan()" style="margin:8px 16px 4px;width:calc(100% - 32px);background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:17px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 18px rgba(5,150,105,.3)">✅ Release Plan to Helper</button>
       <div style="text-align:center;font-size:11px;color:var(--ink3);padding:4px 16px 16px">Helper will be notified and can see the meal plan and ingredient list</div>
     </div>
+    <div style="flex:1;min-height:0"></div>
     <nav class="bnav"><button class="ni" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni on" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
   </div>
 
@@ -496,6 +501,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
       <div style="font-size:13px;color:var(--ink3);text-align:center">No tasks after 6:00 PM</div>
     </div>
     <div style="height:8px"></div>
+    <div style="flex:1;min-height:0"></div>
     <nav class="bnav">
       <button class="ni on" onclick="fNav('schedule',this)"><div class="ni-ic">✅</div><div class="ni-lb">Tasks</div></button>
       <button class="ni" onclick="fNav('grocery',this)"><div class="ni-ic">🛍️</div><div class="ni-lb">Groceries</div></button>
@@ -537,6 +543,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
     <button class="cta go" style="margin-top:12px" id="grocery-submit-btn" onclick="submitGrocery()">✉️ Submit List to Employer</button>
 
     <div style="height:16px"></div>
+    <div style="flex:1;min-height:0"></div>
     <nav class="bnav">
       <button class="ni" onclick="fNav('schedule',this)"><div class="ni-ic">✅</div><div class="ni-lb">Tasks</div></button>
       <button class="ni on" onclick="fNav('grocery',this)"><div class="ni-ic">🛍️</div><div class="ni-lb">Groceries</div></button>
@@ -556,6 +563,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
     <div class="card"><div class="act-item" onclick="toast('Language: Filipino')"><div class="act-dot" style="background:#EFF6FF">🌏</div><div><div class="act-name">Language</div><div class="act-sub">Filipino</div></div><div style="font-size:20px;color:var(--line);margin-left:auto">›</div></div><div class="act-item" onclick="toast('Rest day: Sunday')"><div class="act-dot" style="background:var(--green-l)">📅</div><div><div class="act-name">Rest Day</div><div class="act-sub">Sunday</div></div><div style="font-size:20px;color:var(--line);margin-left:auto">›</div></div></div>
     <div class="card cp" style="background:var(--green-l);border:1.5px solid var(--green-m)"><div style="font-size:14px;font-weight:800;color:var(--green);margin-bottom:10px">This Week</div><div style="display:flex;gap:16px"><div style="text-align:center"><div style="font-size:24px;font-weight:800;color:var(--ink)">17</div><div style="font-size:11px;color:var(--ink3)">Tasks Done</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:800;color:var(--ink)">85%</div><div style="font-size:11px;color:var(--ink3)">On Time</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:800;color:var(--ink)">100%</div><div style="font-size:11px;color:var(--ink3)">Pet Peeves</div></div></div></div>
     <div style="height:16px"></div>
+    <div style="flex:1;min-height:0"></div>
     <nav class="bnav">
       <button class="ni" onclick="fNav('schedule',this)"><div class="ni-ic">✅</div><div class="ni-lb">Tasks</div></button>
       <button class="ni" onclick="fNav('grocery',this)"><div class="ni-ic">🛍️</div><div class="ni-lb">Groceries</div></button>
@@ -2102,7 +2110,7 @@ function confirmDeleteTask() {
 // EMPLOYER — PET PEEVE ADD / EDIT / DELETE
 // ══════════════════════════════════════════════════
 function openAddPP(taskId) {
-  editingPPTaskId = taskId;
+  editingPPTaskId = Number(taskId);
   editingPPId = null;
   pendingPhotoDataUrl = null;
   const t = taskId === GROCERY_TASK_ID ? grocerySystemTask : tasks.find(x => x.id === taskId);
@@ -2116,11 +2124,12 @@ function openAddPP(taskId) {
 }
 
 function openEditPP(taskId, ppId) {
-  const t = taskId === GROCERY_TASK_ID ? grocerySystemTask : tasks.find(x => x.id === taskId);
-  const pp = t && t.petPeeves.find(p => p.id === ppId);
+  const tId = Number(taskId); const pId = Number(ppId);
+  const t = tId === GROCERY_TASK_ID ? grocerySystemTask : tasks.find(x => x.id === tId);
+  const pp = t && t.petPeeves.find(p => p.id === pId);
   if (!pp) return;
-  editingPPTaskId = taskId;
-  editingPPId = ppId;
+  editingPPTaskId = tId;
+  editingPPId = pId;
   pendingPhotoDataUrl = pp.proofImg || null;
   document.getElementById('pp-modal-title').textContent = 'Edit Pet Peeve';
   document.getElementById('pp-inp-title').value = pp.title;
