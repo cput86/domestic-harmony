@@ -52,11 +52,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#94A3B8;min-height:10
 .icon-btn{width:38px;height:38px;border-radius:50%;background:var(--bg);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
 
 /* BOTTOM NAV */
-.bnav{position:sticky;bottom:0;background:var(--white);border-top:1.5px solid var(--line);display:flex;z-index:50}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 12px;gap:3px;border:none;background:none;cursor:pointer;transition:opacity .15s}
-.ni-ic{font-size:20px;line-height:1}
+.bnav{position:sticky;bottom:0;left:0;right:0;background:var(--white);border-top:1.5px solid var(--line);display:flex;z-index:50;flex-shrink:0}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px 10px;gap:2px;border:none;background:none;cursor:pointer;transition:all .2s}
+.ni-ic{font-size:20px;line-height:1;width:44px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:20px;transition:background .2s}
 .ni-lb{font-size:9px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px}
 .ni.on .ni-lb{color:var(--blue)}
+.ni.on .ni-ic{background:var(--blue-l)}
 
 /* SECTION HEADER */
 .sh{font-size:11px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;padding:14px 20px 8px;display:flex;align-items:center;gap:8px}
@@ -343,7 +344,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
     </div>
     <!-- Per-task status list -->
     <div class="sh">Task Status</div>
-    <div id="tracker-task-list" style="margin:0 16px 12px;background:var(--white);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden"></div>
+    <div id="tracker-task-list" style="padding-top:4px"></div>
     <div style="height:8px"></div>
     <nav class="bnav"><button class="ni on" onclick="eNav('home',this)"><div class="ni-ic">📊</div><div class="ni-lb">Today</div></button><button class="ni" onclick="eNav('schedule',this)"><div class="ni-ic">📅</div><div class="ni-lb">Schedule</div></button><button class="ni" onclick="eNav('meals',this)"><div class="ni-ic">🍽️</div><div class="ni-lb">Meals</div></button><button class="ni" onclick="eNav('tasks',this)"><div class="ni-ic">⚙️</div><div class="ni-lb">Task Admin</div></button></nav>
   </div>
@@ -591,14 +592,10 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
         <option value="Child Care">👶 Child Care</option>
         <option value="Other">📦 Other</option>
       </select>
-      <div class="modal-lbl">Emoji Icon</div>
-      <input class="mi" id="nt-emoji" placeholder="e.g. 🧹" maxlength="4"/>
+
       <div class="modal-lbl">Description (shown to helper)</div>
       <textarea class="mi" id="nt-desc" placeholder="What exactly should be done?"></textarea>
-      <div class="modal-lbl">Estimated Duration</div>
-      <select class="mi" id="nt-dur">
-        <option>15 min</option><option>30 min</option><option selected>45 min</option><option>1 hr</option><option>1.5 hrs</option><option>2 hrs</option>
-      </select>
+
       <div class="modal-lbl">Recurrence <span style="font-weight:500;color:var(--ink3)">(optional)</span></div>
       <select class="mi" id="nt-recur" onchange="toggleDayField(this.value)">
         <option value="none" selected>No recurrence (one-off)</option>
@@ -1151,7 +1148,7 @@ function renderTaskLibrary() {
         </div>
         ${(t.petPeeves||[]).map(pp => `
           <div class="pp-row" id="pp-row-${t.id}-${pp.id}">
-            <div class="pp-row-thumb" style="background:${pp.bg||'var(--bg)'}" ${pp.proofImg ? `onclick="expandEvidencePhoto('${pp.proofImg}')" title="Tap to view full photo"` : ''}>
+            <div class="pp-row-thumb" style="background:var(--amber-l)" ${pp.proofImg ? `onclick="expandEvidencePhoto('${pp.proofImg}')" title="Tap to view full photo"` : ''}>
               ${pp.proofImg ? `<img src="${pp.proofImg}" alt="${pp.title}" style="width:100%;height:100%;object-fit:cover;border-radius:6px"/>` : `<span style="font-size:20px">⚠️</span>`}
             </div>
             <div class="pp-row-info">
@@ -1206,8 +1203,8 @@ function renderTrackerHome() {
     const ppDone   = (t.petPeeves||[]).filter(p => p.confirmed).length;
 
     const statusDot = isDone
-      ? `<div style="width:32px;height:32px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0">✓</div>`
-      : `<div style="width:32px;height:32px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${t.emoji}</div>`;
+      ? `<div style="width:32px;height:32px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0;flex-shrink:0">✓</div>`
+      : `<div style="width:32px;height:32px;border-radius:50%;background:var(--line);flex-shrink:0"></div>`;
 
     const statusText = isDone
       ? `<span style="color:var(--green);font-weight:700">Done${t.completedAt ? ' · ' + t.completedAt : ''}</span>`
@@ -1217,19 +1214,31 @@ function renderTrackerHome() {
 
     const taskId = t.id ?? (t._type === 'grocery' ? GROCERY_TASK_ID : null);
     const clickable = isDone && taskId !== null;
-    return `<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:${isLast?'none':'1px solid var(--line)'};cursor:${clickable?'pointer':'default'};${clickable?'background:var(--white);':''}transition:background .15s"
-      ${clickable ? `onclick="openEvidenceModal(${taskId})"` : ''}
-      onmouseenter="${clickable?`this.style.background='var(--bg)'`:'undefined'}"
-      onmouseleave="${clickable?`this.style.background='var(--white)'`:'undefined'}">
-      ${statusDot}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:700;color:${isDone?'var(--ink3)':'var(--ink)'};text-decoration:${isDone?'line-through':'none'}">${t.name}</div>
-        <div style="font-size:12px;margin-top:2px">${statusText}</div>
-        ${isDone && clickable ? `<div style="font-size:11px;color:var(--blue);font-weight:700;margin-top:3px">Tap to view evidence →</div>` : ''}
+    const catEmoji = CAT_ICONS[t.cat] || '📋';
+
+    if (isDone) {
+      return `<div style="margin:0 16px 10px;border-radius:18px;background:linear-gradient(135deg,#059669,#34D399);box-shadow:var(--sh);cursor:${clickable?'pointer':'default'};overflow:hidden"
+        ${clickable ? `onclick="openEvidenceModal(${taskId})"` : ''}>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0">${catEmoji}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;color:#fff">${t.name}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:2px">✓ Done${t.completedAt?' · '+t.completedAt:''}</div>
+            ${clickable ? `<div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:2px">Tap to view evidence →</div>` : ''}
+          </div>
+          <div style="width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0">✓</div>
+        </div>
+      </div>`;
+    }
+    return `<div style="margin:0 16px 10px;border-radius:18px;background:linear-gradient(135deg,#FEF2F2,#FECACA44);border:1.5px solid #FECACA;box-shadow:var(--sh);overflow:hidden">
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--red-m);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${catEmoji}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700;color:var(--ink)">${t.name}</div>
+          <div style="font-size:12px;margin-top:2px">${statusText}</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:var(--ink3);white-space:nowrap">${t.time||''}</div>
       </div>
-      ${isDone
-        ? `<div style="font-size:18px">✅</div>`
-        : `<div style="font-size:12px;font-weight:700;color:var(--blue);white-space:nowrap">${t.time||''}</div>`}
     </div>`;
   }).join('');
 }
@@ -1444,7 +1453,7 @@ function renderFdwTile(t) {
       <div class="tile-icon ${CAT_COLORS[t.cat]||'ic-b'}">${t.emoji}</div>
       <div class="tile-body">
         <div class="tile-name">${t.name}</div>
-        <div class="tile-sub">${t.time||''} · ${t.dur||''}</div>
+        <div class="tile-sub">${t.time||''}</div>
         ${badge}
       </div>
       <div style="font-size:22px;color:var(--line)">›</div>
@@ -1825,37 +1834,36 @@ function renderWeeklyOverview() {
   const CAT_COLORS = {'Cleaning':'#2563EB','Cooking':'#059669','Child Care':'#D97706','Other':'#64748B'};
   const weekDates  = getWeekDates(weekOffset);
 
+  // Compute live totals for progress bar (#3)
+  const allDayItems = weekDates.flatMap(d => scheduleData[getDayKey(d)] || []);
+  const totalTasks = allDayItems.length;
+  const doneTasks  = allDayItems.filter(i => i.completed).length;
+  const weekPct    = totalTasks > 0 ? Math.round((doneTasks/totalTasks)*100) : 0;
+  const remaining  = totalTasks - doneTasks;
+  const pctEl  = document.querySelector('.wk-pct');
+  const fillEl = document.querySelector('.wk-fill');
+  const remEl  = document.querySelector('.wk-rem span');
+  if (pctEl)  pctEl.textContent  = weekPct + '%';
+  if (fillEl) fillEl.style.width = weekPct + '%';
+  if (remEl)  remEl.textContent  = remaining + ' task' + (remaining!==1?'s':'') + ' remaining';
+
   el.innerHTML = weekDates.map((date, idx) => {
     const key    = getDayKey(date);
     const items  = scheduleData[key] || [];
     const isRest = key === 'Sun';
-    const isSat  = key === 'Sat';
     const count  = items.length;
     const dayStr = formatDayShort(date);
-    const cats   = [...new Set(items.map(i => i.cat))];
-    const dots   = cats.map(c => `<span style="width:8px;height:8px;border-radius:50%;background:${CAT_COLORS[c]||'#94A3B8'};display:inline-block"></span>`).join('');
-    const preview = items.slice(0,2).map(i => `<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--bg);border-radius:20px;padding:2px 8px;color:var(--ink2);font-weight:600">${i.emoji} ${i.name}</span>`).join('');
-    const extra   = count > 2 ? `<span style="font-size:11px;color:var(--ink3);font-weight:600">+${count-2} more</span>` : '';
 
-    if (isRest) return `
-      <div style="margin:0 16px 10px;background:var(--white);border-radius:18px;padding:14px 16px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px;opacity:.45">
-        <div style="width:44px;height:44px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px">🌙</div>
-        <div style="flex:1"><div style="font-size:15px;font-weight:700;color:var(--ink)">${dayStr}</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">Rest day — no tasks</div></div>
-        <span style="background:#F1F5F9;color:var(--ink3);font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px">MOM Rest</span>
-      </div>`;
+    // #4: skip rest day tile entirely
+    if (isRest) return '';
 
     return `
-      <div style="margin:0 16px 10px;background:var(--white);border-radius:18px;padding:14px 16px;box-shadow:var(--sh);cursor:pointer" onclick="openDayDetail('${key}')">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${count?'10px':'0'}">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="font-size:16px;font-weight:800;color:var(--ink)">${dayStr}</div>
-            <span style="background:${count?'var(--blue-l)':'var(--bg)'};color:${count?'var(--blue)':'var(--ink3)'};font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px">${count} task${count!==1?'s':''}</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">${dots}<span style="font-size:18px;color:var(--line);margin-left:4px">›</span></div>
+      <div style="margin:0 16px 10px;background:var(--white);border-radius:18px;padding:14px 18px;box-shadow:var(--sh);cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="openDayDetail('${key}')">
+        <div style="font-size:15px;font-weight:800;color:var(--ink)">${dayStr}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="background:${count?'var(--blue-l)':'var(--bg)'};color:${count?'var(--blue)':'var(--ink3)'};font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px">${count} task${count!==1?'s':''}</span>
+          <span style="font-size:18px;color:var(--line)">›</span>
         </div>
-        ${count
-          ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${preview}${extra}</div>`
-          : `<div style="font-size:12px;color:var(--ink3)">No tasks yet — tap to add</div>`}
       </div>`;
   }).join('');
 }
@@ -2004,7 +2012,6 @@ function toggleDayField(recur) {
 function openNewTaskModal() {
   document.getElementById('nt-name').value = '';
   document.getElementById('nt-desc').value = '';
-  document.getElementById('nt-emoji').value = '';
   document.getElementById('nt-recur').value = 'none';
   const row = document.getElementById('nt-day-row');
   if (row) row.style.display = 'none';
@@ -2015,13 +2022,12 @@ function saveNewTask() {
   const name  = document.getElementById('nt-name').value.trim();
   if (!name) { toast('Please enter a task name'); return; }
   const cat   = document.getElementById('nt-cat').value;
-  const emoji = document.getElementById('nt-emoji').value.trim() || CAT_ICONS[cat] || '📋';
+  const emoji = CAT_ICONS[cat] || '📋';
   const desc  = document.getElementById('nt-desc').value.trim();
-  const dur   = document.getElementById('nt-dur').value;
   const recur = document.getElementById('nt-recur').value;
   const day   = document.getElementById('nt-day').value;
 
-  const newTask = { id:nextTaskId++, name, emoji, cat, dur, desc, recur, day,
+  const newTask = { id:nextTaskId++, name, emoji, cat, desc, recur, day,
                     petPeeves:[], completed:false, time:'09:00 AM' };
   // Local-first: add immediately, sync to DB in background
   tasks.push(newTask);
@@ -2033,7 +2039,7 @@ function saveNewTask() {
   // DB sync
   if (currentUser) {
     Promise.resolve()
-      .then(() => _sb.from('tasks').insert({ name, emoji, cat, dur, description: desc, time_slot: '09:00 AM', recur, recur_day: day, is_system: false, completed: false }).select().single())
+      .then(() => _sb.from('tasks').insert({ name, emoji, cat, description: desc, time_slot: '09:00 AM', recur, recur_day: day, is_system: false, completed: false }).select().single())
       .then(({data}) => { if (data) newTask.id = data.id; })
       .catch(e => console.warn('Save task DB error:', e.message));
   }
@@ -2487,16 +2493,20 @@ function importRecipeJSON(input) {
         steps:        recipe.steps,
         notes:        recipe.notes || [],
       }).then(saved => {
-        if (saved) { recipe.id = saved.id; }
+        if (saved && saved.id) { recipe.id = saved.id; }
         cookbook.push(recipe);
         renderCookbook();
-      }).catch(() => {
-        // If DB write fails, still add locally
+      }).catch(e => {
+        console.warn('Recipe DB save failed:', e);
         cookbook.push(recipe);
         renderCookbook();
+        const s = document.getElementById('import-status');
+        if (s) s.textContent += ' (saved locally — DB sync failed)';
       });
       statusEl.style.color = 'var(--green)';
-      statusEl.textContent = `✅ "${recipe.name}" added to cookbook!`;
+      statusEl.textContent = currentUser
+        ? `✅ "${recipe.name}" added to cookbook!`
+        : `✅ "${recipe.name}" added (preview only — log in to save permanently)`;
       input.value = '';
       toast(`✅ "${recipe.name}" imported successfully`);
     } catch(err) {
