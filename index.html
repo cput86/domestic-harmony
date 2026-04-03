@@ -326,7 +326,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
   ═══════════════════════════════════════ -->
   <div class="sc on" id="e-home">
     <div class="tbar">
-      <div class="tbar-eye">Friday, Mar 29 · Maria's Progress</div>
+      <div class="tbar-eye" id="tracker-date-lbl">Today · Maria's Progress</div>
       <div class="tbar-row"><div class="tbar-title">Today Tracker</div><button onclick="signOut()" style="background:none;border:1.5px solid var(--line);border-radius:20px;padding:5px 12px;font-family:inherit;font-size:12px;font-weight:700;color:var(--ink3);cursor:pointer">Sign out</button></div>
     </div>
     <div style="height:12px"></div>
@@ -375,7 +375,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
     <div class="tbar">
       <div class="tbar-eye">Weekly Schedule</div>
       <div class="tbar-row">
-        <div class="tbar-title" id="wk-month-title">March 2026</div>
+        <div class="tbar-title" id="wk-month-title"></div>
         <div style="display:flex;gap:8px">
           <button class="icon-btn" onclick="shiftWeek(-1)" title="Previous week">‹</button>
           <button class="icon-btn" onclick="shiftWeek(1)" title="Next week">›</button>
@@ -384,7 +384,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
     </div>
     <div style="height:12px"></div>
     <div class="wk-prog"><div style="display:flex;align-items:flex-end;gap:8px"><div class="wk-pct">65%</div><div class="wk-lbl">Completion Rate</div></div><div class="wk-track"><div class="wk-fill"></div></div><div class="wk-rem">You have <span>12 tasks remaining</span> this week.</div></div>
-    <div class="sh">Week of Mar 23–29 <span style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:none;letter-spacing:0">Tap any day to manage it</span></div>
+    <div class="sh" id="week-range-lbl">Week of ... <span style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:none;letter-spacing:0">Tap any day to manage it</span></div>
     <div id="weekly-overview-grid"></div>
     <div style="height:16px"></div>
     <div style="flex:1;min-height:0"></div>
@@ -481,7 +481,7 @@ textarea.mi:focus,select.mi:focus{border-color:var(--blue)}
   ═══════════════════════════════════════ -->
   <div class="sc" id="f-schedule">
     <div class="tbar">
-      <div class="tbar-eye">Friday, Mar 29</div>
+      <div class="tbar-eye" id="fdw-date-lbl">Today</div>
       <div class="tbar-row">
         <div class="tbar-title">My Tasks</div>
         <div style="text-align:right">
@@ -1009,6 +1009,7 @@ async function loadAllData() {
 }
 
 function setRoleUI(role) {
+  refreshDayLabels();
   // Update role bar highlight
   document.querySelectorAll('.rb').forEach(b => b.classList.remove('on'));
   const btn = document.querySelector(`.rb[data-role="${role}"]`);
@@ -1181,7 +1182,18 @@ function renderTaskLibrary() {
 // ══════════════════════════════════════════════════
 // RENDER › EMPLOYER TODAY TRACKER
 // ══════════════════════════════════════════════════
+function todayLabel() {
+  const d = new Date();
+  const DAYS  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return DAYS[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+}
+
 function renderTrackerHome() {
+  const lbl = document.getElementById('tracker-date-lbl');
+  if (lbl) lbl.textContent = todayLabel() + " · Maria's Progress";
+  const fdwLbl = document.getElementById('fdw-date-lbl');
+  if (fdwLbl) fdwLbl.textContent = todayLabel();
   const allTasks = buildFdwDailyTasks();
   const total    = allTasks.length;
   const done     = allTasks.filter(t => t.completed).length;
@@ -1765,14 +1777,42 @@ function addNotePhoto(input, taskId) {
 // SCHEDULE — WEEKLY OVERVIEW & DAY DETAIL
 // ══════════════════════════════════════════════════
 const DAY_KEYS   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const DAY_LABELS = {Mon:'Monday, Mar 23',Tue:'Tuesday, Mar 24',Wed:'Wednesday, Mar 25',Thu:'Thursday, Mar 26',Fri:'Friday, Mar 27',Sat:'Saturday, Mar 28',Sun:'Sunday, Mar 29'};
-const DAY_SHORT  = {Mon:'Mon 23',Tue:'Tue 24',Wed:'Wed 25',Thu:'Thu 26',Fri:'Fri 27',Sat:'Sat 28',Sun:'Sun 29'};
+// DAY_LABELS and DAY_SHORT are computed dynamically from the current week
+function getDayLabels(offset) {
+  const dates = getWeekDates(offset);
+  const FULL  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const keys  = dates.map(d => getDayKey(d));
+  const labels = {}; const shorts = {};
+  dates.forEach((d, i) => {
+    const k = keys[i];
+    labels[k] = FULL[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+    shorts[k]  = SHORT[d.getDay()] + ' ' + d.getDate();
+  });
+  return { labels, shorts };
+}
+// Keep DAY_LABELS/DAY_SHORT as aliases updated each render
+let DAY_LABELS = {}; let DAY_SHORT = {};
+function refreshDayLabels() {
+  const { labels, shorts } = getDayLabels(weekOffset);
+  DAY_LABELS = labels; DAY_SHORT = shorts;
+}
 
-// Week navigation — offset from the base week (Mar 23–29 2026 = 0)
+// Week navigation — weekOffset is relative to the REAL current Monday
 let weekOffset = 0;
 
-// Base week dates (Mon Mar 23 2026 = day 0)
-const BASE_WEEK_MON = new Date(2026, 2, 23); // month is 0-indexed
+// Calculate the Monday of the current week dynamically
+function getRealCurrentMonday() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const day = today.getDay(); // 0=Sun, 1=Mon ... 6=Sat
+  const diff = (day === 0) ? -6 : 1 - day; // adjust so Monday=0
+  const mon = new Date(today);
+  mon.setDate(today.getDate() + diff);
+  return mon;
+}
+const BASE_WEEK_MON = getRealCurrentMonday();
 
 function getWeekDates(offset) {
   const days = [];
@@ -1839,6 +1879,14 @@ const CAT_IC = {'Cleaning':'ic-b','Cooking':'ic-g','Child Care':'ic-a','Other':'
 function renderWeeklyOverview() {
   const el = document.getElementById('weekly-overview-grid');
   if (!el) return;
+  // Always update month title and week label
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  refreshDayLabels();
+  const weekDates0 = getWeekDates(weekOffset);
+  const titleEl = document.getElementById('wk-month-title');
+  if (titleEl) titleEl.textContent = MONTHS[weekDates0[0].getMonth()] + ' ' + weekDates0[0].getFullYear();
+  const shEl = document.getElementById('week-range-lbl');
+  if (shEl) shEl.innerHTML = 'Week of ' + formatWeekLabel(weekOffset) + ' <span style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:none;letter-spacing:0">Tap any day to manage it</span>';
   const CAT_COLORS = {'Cleaning':'#2563EB','Cooking':'#059669','Child Care':'#D97706','Other':'#64748B'};
   const weekDates  = getWeekDates(weekOffset);
 
@@ -2113,7 +2161,7 @@ function openAddPP(taskId) {
   editingPPTaskId = Number(taskId);
   editingPPId = null;
   pendingPhotoDataUrl = null;
-  const t = taskId === GROCERY_TASK_ID ? grocerySystemTask : tasks.find(x => x.id === taskId);
+  const t = editingPPTaskId === GROCERY_TASK_ID ? grocerySystemTask : tasks.find(x => x.id === editingPPTaskId);
   document.getElementById('pp-modal-title').textContent = `Add Pet Peeve${t ? ' — '+t.name : ''}`;
   document.getElementById('pp-inp-title').value = '';
   document.getElementById('pp-inp-note').value = '';
