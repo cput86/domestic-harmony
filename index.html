@@ -1043,19 +1043,10 @@ const grocerySystemTask = {
   groceryTask: true,   // special behaviour: routes to grocery screen
   completed: false,
   grocerySubmitted: false,  // true after FDW submits list
-  petPeeves: [
-    { id:998, title:'Keep all shopping receipts', note:'Do not throw away any receipts — place them on the kitchen counter for Mrs Tan to check.', emoji:'🧾', bg:'#FEF9C3', proofImg:null, confirmed:false }
-  ],
+  petPeeves: [], // populated from Supabase on login
 };
 
-let tasks = [
-  { id: 1, name: 'Breakfast Prep',     emoji:'☕', cat:'Cooking',    dur:'20 min', desc:'Prepare breakfast for the family.', petPeeves:[], completed:true,  time:'07:30 AM', completedAt:'07:30 AM' },
-  { id: 2, name: 'Clean the Shower',   emoji:'🚿', cat:'Cleaning',   dur:'15–20 min', desc:'High-standard deep clean of all glass surfaces, tiles, and fixtures. Ensure all drainage is clear.', supplies:['🧴 Glass Cleaner','🧽 Microfibre Cloth','🪥 Grout Brush','⚗️ Descaler'], proTip:'Use the lemon-scented spray under the sink for the final finish.', petPeeves:[
-      { id:1, title:'Hair in the Drain',      note:'Lift the cover and clear the trap completely. This is my #1 frustration.', emoji:'🕳️', bg:'#FEE2E2', proofImg:null, confirmed:false },
-      { id:2, title:'Water Spots on Glass',   note:'Always squeegee and wipe dry. Water spots make the whole bathroom look uncleaned.', emoji:'💧', bg:'#DBEAFE', proofImg:null, confirmed:false }
-    ], completed:false, time:'09:00 AM' },
-  { id: 3, name: 'Laundry & Folding',  emoji:'👕', cat:'Cleaning',   dur:'1.5 hrs', desc:'Wash, dry, fold and return all laundry to correct rooms.', petPeeves:[], completed:false, time:'01:00 PM' },
-];
+let tasks = []; // populated from Supabase on login
 
 let nextTaskId = 10;
 let pendingDeleteTaskId = null;
@@ -1856,18 +1847,7 @@ function shiftWeek(dir) {
   if (shEl) shEl.innerHTML = 'Week of ' + formatWeekLabel(weekOffset) + ' <span style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:none;letter-spacing:0">Tap any day to manage it</span>';
 }
 
-const scheduleData = {
-  Mon: [{name:'Breakfast Prep',        emoji:'☕', cat:'Cooking',    time:'7:30 AM'},
-        {name:'Bathroom Sanitisation', emoji:'🛁', cat:'Cleaning',   time:'10:00 AM'}],
-  Tue: [{name:'Laundry & Folding',     emoji:'👕', cat:'Cleaning',   time:'9:00 AM'},
-        {name:'Meal Prep – Lunch',     emoji:'🥗', cat:'Cooking',    time:'11:30 AM'}],
-  Wed: [{name:'Living Room Deep Clean',emoji:'🧹', cat:'Cleaning',   time:'9:00 AM'},
-        {name:'Meal Prep – Dinner',    emoji:'🍽️', cat:'Cooking',   time:'4:30 PM'}],
-  Thu: [{name:'Pick up Sofia',         emoji:'🎓', cat:'Child Care', time:'3:30 PM'}],
-  Fri: [{name:'Grocery Restocking',    emoji:'🛒', cat:'Other',      time:'10:00 AM'},
-        {name:'Kitchen Polish',        emoji:'✨', cat:'Cleaning',   time:'2:00 PM'}],
-  Sat: [], Sun: [],
-};
+const scheduleData = {Mon:[],Tue:[],Wed:[],Thu:[],Fri:[],Sat:[],Sun:[]}; // populated from tasks[]
 
 // poolTasks removed — schedule uses tasks[] from Task Admin
 
@@ -2244,67 +2224,13 @@ function deletePP(taskId, ppId) {
 // ══════════════════════════════════════════════════
 
 // Cookbook: array of recipe objects
-let cookbook = [
-  {
-    id:'r1', name:'Hainanese Chicken Rice', emoji:'🍚', url:'https://www.recipetineats.com/hainanese-chicken-rice/',
-    time:'45 min', servings:4, cat:'Mains',
-    desc:'Classic Singapore dish of tender poached chicken served over fragrant rice cooked in chicken broth.',
-    ingredients:[
-      {name:'Whole Chicken',    qty:'1.5',  unit:'kg'},
-      {name:'Jasmine Rice',     qty:'400',  unit:'g'},
-      {name:'Ginger',           qty:'60',   unit:'g'},
-      {name:'Garlic',           qty:'6',    unit:'cloves'},
-      {name:'Spring Onion',     qty:'4',    unit:'stalks'},
-      {name:'Sesame Oil',       qty:'1',    unit:'tbsp'},
-      {name:'Soy Sauce',        qty:'3',    unit:'tbsp'},
-      {name:'Chicken Stock',    qty:'1',    unit:'L'},
-    ],
-    steps:['Blanch chicken in boiling water for 1 minute, discard water.','Simmer chicken in fresh water with ginger and spring onion for 35 min.','Cook rice in chicken broth with garlic and ginger.','Slice chicken, serve over rice with chilli and ginger sauces.'],
-  },
-  {
-    id:'r2', name:'Aglio e Olio', emoji:'🍝', url:'https://www.bonappetit.com/recipe/spaghetti-aglio-e-olio',
-    time:'20 min', servings:2, cat:'Pasta',
-    desc:'Simple Italian pasta with garlic, olive oil, chilli, and parsley. Quick and flavourful weeknight meal.',
-    ingredients:[
-      {name:'Spaghetti',        qty:'400',  unit:'g'},
-      {name:'Olive Oil',        qty:'80',   unit:'ml'},
-      {name:'Garlic',           qty:'8',    unit:'cloves'},
-      {name:'Chilli Flakes',    qty:'1',    unit:'tsp'},
-      {name:'Fresh Parsley',    qty:'1',    unit:'bunch'},
-      {name:'Parmesan',         qty:'50',   unit:'g'},
-    ],
-    steps:['Cook spaghetti until al dente, reserve 1 cup pasta water.','Sauté sliced garlic in olive oil over low heat until golden.','Add chilli flakes, then pasta and a splash of pasta water.','Toss with parsley and parmesan, serve immediately.'],
-  },
-  {
-    id:'r3', name:'Fish Curry with Rice', emoji:'🍛', url:'https://www.allrecipes.com/recipe/fish-curry',
-    time:'60 min', servings:4, cat:'Mains',
-    desc:'Rich and aromatic Singaporean-style fish curry with coconut milk, served over steamed rice.',
-    ingredients:[
-      {name:'Fish Fillets',     qty:'600',  unit:'g'},
-      {name:'Coconut Milk',     qty:'400',  unit:'ml'},
-      {name:'Curry Powder',     qty:'3',    unit:'tbsp'},
-      {name:'Onion',            qty:'2',    unit:'whole'},
-      {name:'Tomato',           qty:'2',    unit:'whole'},
-      {name:'Ginger',           qty:'30',   unit:'g'},
-      {name:'Garlic',           qty:'4',    unit:'cloves'},
-      {name:'Jasmine Rice',     qty:'300',  unit:'g'},
-      {name:'Vegetable Oil',    qty:'2',    unit:'tbsp'},
-    ],
-    steps:['Blend onion, ginger, garlic into a paste.','Fry paste with curry powder until fragrant, 5 min.','Add coconut milk and tomatoes, simmer 15 min.','Add fish fillets, cook 10 min until flaky. Serve with rice.'],
-  },
-];
+let cookbook = []; // populated from Supabase on login
 let nextRecipeId = 10;
 
 // Week plan: day → recipeId or null
 const MEAL_DAYS = ['Mon','Tue','Wed','Thu','Fri'];
 const MEAL_DAY_LABELS = {Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday'};
-let weekPlan = {
-  Mon: {recipeId:'r1', pax:4, scaled: null},
-  Tue: {recipeId:'r2', pax:2, scaled: null},
-  Wed: {recipeId:'r3', pax:4, scaled: null},
-  Thu: null,
-  Fri: null
-};
+let weekPlan = {Mon:null,Tue:null,Wed:null,Thu:null,Fri:null}; // populated from Supabase on login
 
 // FDW grocery state: key=ingredientKey, value={status:'have'|'need', qty, unit, adjustedQty}
 let fdwGroceryState = {};
@@ -2535,31 +2461,29 @@ function importRecipeJSON(input) {
         base_servings: data.base_servings || 4,
       };
 
-      // Save to Supabase
-      db.insertRecipe({
-        id:           recipe.id,
-        name:         recipe.name,
-        emoji:        recipe.emoji,
-        category:     recipe.cat,
-        description:  recipe.desc,
-        source_url:   recipe.url,
-        source_credit:recipe.sourceCredit,
-        cook_time:    recipe.time,
-        base_servings:recipe.base_servings,
-        ingredients:  recipe.ingredients,
-        steps:        recipe.steps,
-        notes:        recipe.notes || [],
-      }).then(saved => {
-        if (saved && saved.id) { recipe.id = saved.id; }
-        cookbook.push(recipe);
-        renderCookbook();
-      }).catch(e => {
-        console.warn('Recipe DB save failed:', e);
-        cookbook.push(recipe);
-        renderCookbook();
-        const s = document.getElementById('import-status');
-        if (s) s.textContent += ' (saved locally — DB sync failed)';
-      });
+      // Add to memory immediately — never lose it
+      cookbook.push(recipe);
+      renderCookbook();
+      // Persist to Supabase in background
+      if (currentUser) {
+        Promise.resolve()
+          .then(() => _sb.from('cookbook').insert({
+            id:           recipe.id,
+            name:         recipe.name,
+            emoji:        recipe.emoji,
+            category:     recipe.cat,
+            description:  recipe.desc,
+            source_url:   recipe.url,
+            source_credit:recipe.sourceCredit,
+            cook_time:    recipe.time,
+            base_servings:recipe.base_servings,
+            ingredients:  recipe.ingredients,
+            steps:        recipe.steps,
+            notes:        recipe.notes || [],
+          }).select().single())
+          .then(({data}) => { if (data && data.id) recipe.id = data.id; })
+          .catch(e => console.warn('Recipe DB save error:', e.message));
+      }
       statusEl.style.color = 'var(--green)';
       statusEl.textContent = currentUser
         ? `✅ "${recipe.name}" added to cookbook!`
