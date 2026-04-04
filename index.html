@@ -588,18 +588,10 @@ html,body{height:100%;overflow:hidden;background:#e8eaf0;font-family:
         <option value="Child Care">👶 Child Care</option>
         <option value="Other">📦 Other</option>
       </select>
-      <div class="modal-label">Duration</div>
-      <input class="modal-input" id="nt-dur" placeholder="e.g. 30 min"/>
-      <div class="modal-label">Time Slot</div>
-      <input class="modal-input" id="nt-time" placeholder="e.g. 09:00 AM"/>
-      <div class="modal-label">Emoji</div>
-      <input class="modal-input" id="nt-emoji" placeholder="e.g. 🚿"/>
       <div class="modal-label">Description / Instructions</div>
-      <textarea class="modal-textarea" id="nt-desc" rows="3" placeholder="What should be done and how?"></textarea>
+      <textarea class="modal-textarea" id="nt-desc" rows="4" placeholder="What should be done and how?"></textarea>
       <div class="modal-label">Pro Tip (optional)</div>
       <input class="modal-input" id="nt-protip" placeholder="A helpful hint for the helper"/>
-      <div class="modal-label">Supplies needed (comma-separated)</div>
-      <input class="modal-input" id="nt-supplies" placeholder="e.g. Glass Cleaner, Cloth"/>
     </div>
     <div class="modal-footer">
       <button class="modal-btn modal-btn-secondary" onclick="closeModal('modal-task')">Cancel</button>
@@ -656,34 +648,23 @@ html,body{height:100%;overflow:hidden;background:#e8eaf0;font-family:
   <div class="top-bar">
     <div class="avatar" id="emp-avatar" onclick="eNav('profile')">E</div>
     <h1>Domestic Harmony</h1>
-    <button class="bell-btn" onclick="openNotifPanel()">
-      🔔<span class="notif-badge" id="emp-notif-badge" style="display:none"></span>
-    </button>
-  </div>
-  <div class="home-hero">
-    <div class="home-date" id="today-date-lbl"></div>
-    <div class="home-title">Domestic<br><span>Harmony</span></div>
-  </div>
-  <div class="ring-row" id="category-rings"></div>
-  <div style="height:12px"></div>
-  <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;">
-      <div style="font-size:15px;font-weight:800;color:var(--ink)">Quick View</div>
-      <a href="#" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:600"
-        onclick="eNav('schedule');return false">See All →</a>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="switchToHelperView()" style="background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--ink3);cursor:pointer;font-family:inherit;">👁 Helper View</button>
+      <button class="bell-btn" onclick="openNotifPanel()">🔔<span class="notif-badge" id="emp-notif-badge" style="display:none"></span></button>
     </div>
-    <div id="quick-view-list"></div>
   </div>
-  <div class="card">
-    <div style="padding:14px 16px 8px;font-size:15px;font-weight:800;color:var(--ink)">Recent Activity</div>
-    <div id="activity-feed"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 4px;">
+    <div>
+      <div class="home-date" id="today-date-lbl"></div>
+      <div style="font-size:22px;font-weight:800;color:var(--ink);">Daily Routine</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:28px;font-weight:800;color:var(--blue);" id="emp-pct-lbl">0%</div>
+      <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;">Day Progress</div>
+    </div>
   </div>
-  <div class="insight-card">
-    <div style="font-size:20px">✨</div>
-    <div class="insight-card-title">Household Insights</div>
-    <div class="insight-card-text" id="insight-text">Loading insights…</div>
-    <button class="insight-btn" onclick="toast('Analytics coming soon!')">Open Analytics</button>
-  </div>
+  <div class="pbar-wrap"><div class="pbar-fill" id="emp-pbar" style="width:0%;background:var(--blue);"></div></div>
+  <div id="emp-task-list" style="padding-top:4px;"></div>
 </div>
 
 <!-- EMPLOYER TASKS -->
@@ -712,13 +693,7 @@ html,body{height:100%;overflow:hidden;background:#e8eaf0;font-family:
   </div>
   <div style="padding:12px 16px 4px;font-size:15px;font-weight:800;color:var(--ink);" id="week-month-label"></div>
   <div class="week-strip" id="week-strip"></div>
-  <div id="sched-day-panel" style="margin-top:8px;"></div>
-  <div class="week-progress">
-    <div class="wp-label">Weekly Progress</div>
-    <div><span class="wp-pct" id="wp-pct-num">0%</span><span style="font-size:14px;color:rgba(255,255,255,.7);margin-left:6px">Completion Rate</span></div>
-    <div class="wp-bar-wrap"><div class="wp-bar-fill" id="wp-bar-fill" style="width:0%"></div></div>
-    <div class="wp-remain" id="wp-remain-text"></div>
-  </div>
+  <div id="sched-day-tasks" style="margin-top:4px;"></div>
   <div class="sh">Task Pool <span class="chip chip-blue" id="pool-count-badge">0 available</span></div>
   <div class="pool-grid" id="pool-grid"></div>
   <div style="height:12px;"></div>
@@ -1080,18 +1055,20 @@ const db = {
   },
   async insertRecipe(r) {
     const row = {
-      id:          r.id || undefined,
       name:        r.name,
       emoji:       r.emoji || '🍽',
       category:    r.cat || r.category || 'Other',
       description: r.desc || r.description || '',
       source_url:  r.url  || r.source_url  || null,
       cook_time:   r.time || r.cook_time   || null,
-      servings:    r.servings || 4,
       ingredients: typeof r.ingredients === 'string' ? r.ingredients : JSON.stringify(r.ingredients || []),
       steps:       typeof r.steps === 'string' ? r.steps : JSON.stringify(r.steps || []),
       hero_img_url: r.heroImg || r.hero_img_url || null,
     };
+    // Only add servings if it's present in the recipe (column may not exist in all schemas)
+    if (r.servings != null) row.servings = r.servings;
+    // Only add id if it's a string (custom IDs from JSON files) - let DB generate numeric IDs
+    if (r.id && typeof r.id === 'string') row.id = r.id;
     const { data, error } = await _sb.from('cookbook').insert(row).select().single();
     if (error) throw error;
     return data;
@@ -1496,68 +1473,68 @@ function addNotification(role, data) {
 </script>
 <script>
 // ═══════════════════════════════════════════════════
-// EMPLOYER HOME
+// EMPLOYER HOME — same tile view as helper, plus "View Evidence" on completed tasks
 // ═══════════════════════════════════════════════════
 function renderEmployerHome() {
-  // Category rings
-  const cats = ['Cleaning','Cooking','Child Care'];
-  const catColors = {Cleaning:'#1d4ed8',Cooking:'#16a34a','Child Care':'#d97706'};
-  const rings = document.getElementById('category-rings');
-  if (!rings) return;
-  rings.innerHTML = cats.map(cat => {
-    const catTasks = tasks.filter(t => t.cat === cat);
-    const done = catTasks.filter(t => t.completed).length;
-    const total = catTasks.length;
-    const pct = total ? Math.round((done/total)*100) : 0;
-    const color = catColors[cat];
-    const r=28, circ=2*Math.PI*r;
-    const dash = (pct/100)*circ;
-    return `<div class="ring-card" onclick="eNav('tasks',document.getElementById('enav-tasks'))">
-      <div class="ring-svg">
-        <svg width="64" height="64" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r="${r}" fill="none" stroke="#e5e7eb" stroke-width="5"/>
-          <circle cx="32" cy="32" r="${r}" fill="none" stroke="${color}" stroke-width="5"
-            stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"/>
-        </svg>
-        <div class="ring-icon">${CAT_ICONS[cat]||'📋'}</div>
-      </div>
-      <div class="ring-label">${cat}</div>
-      <div class="ring-pct">${pct}% Complete</div>
-    </div>`;
-  }).join('');
+  const container = document.getElementById('emp-task-list');
+  if (!container) return;
+  const total = tasks.length;
+  const done  = tasks.filter(t=>t.completed).length;
+  const pct   = total ? Math.round((done/total)*100) : 0;
+  const pctEl = document.getElementById('emp-pct-lbl');
+  const pbar  = document.getElementById('emp-pbar');
+  if (pctEl) pctEl.textContent = pct+'%';
+  if (pbar)  { pbar.style.width=pct+'%'; pbar.style.background=pct<30?'var(--red)':pct<70?'var(--amber)':'var(--green)'; }
 
-  // Quick view — next 3 upcoming/active tasks
-  const qv = document.getElementById('quick-view-list');
-  const upcoming = tasks.filter(t=>!t.completed).slice(0,3);
-  if (qv) qv.innerHTML = upcoming.length ? upcoming.map(t=>`
-    <div class="qv-item" onclick="eNav('tasks',document.getElementById('enav-tasks'))">
-      <div class="qv-icon">${t.emoji}</div>
-      <div class="qv-body">
-        <div class="qv-title">${t.name}</div>
-        <div class="qv-sub">${t.time||'Scheduled'} · ${t.cat}</div>
-      </div>
-      <div style="color:var(--ink3);font-size:18px;">›</div>
-    </div>`).join('')
-    : '<div style="padding:16px;text-align:center;color:var(--ink3);font-size:13px;">All tasks complete today 🎉</div>';
+  if (!tasks.length) {
+    container.innerHTML='<div style="padding:40px 16px;text-align:center;color:var(--ink3);"><div style="font-size:36px;margin-bottom:8px;">📋</div><div style="font-size:14px;">No tasks yet.<br>Go to Tasks tab to add tasks.</div></div>';
+    return;
+  }
 
-  // Activity feed — completed tasks + recent adds
-  const af = document.getElementById('activity-feed');
-  const completed = tasks.filter(t=>t.completed);
-  if (af) af.innerHTML = completed.length ? completed.slice(0,4).map(t=>`
-    <div class="act-item">
-      <div class="act-dot" style="background:var(--green-l);color:var(--green);">✓</div>
-      <div class="act-body">
-        <div class="act-title">${t.name} Completed</div>
-        <div class="act-sub">By Helper${t.completedAt?' at '+t.completedAt:''}</div>
-      </div>
-    </div>`).join('')
-    : '<div style="padding:16px;text-align:center;color:var(--ink3);font-size:13px;">No completed tasks yet today</div>';
+  function empTaskTile(t) {
+    const ppCount = (t.petPeeves||[]).length;
+    if (t.completed) return `<div class="ttile t-done fadein" onclick="viewEvidence(${t.id})">
+      <div class="ttile-inner">
+        <div class="tile-icon ic-w">${t.emoji}</div>
+        <div class="tile-body">
+          <div class="tile-name w">${t.name}</div>
+          <div class="tile-sub w">${t.cat}${t.completedAt?' · Done at '+t.completedAt:' · Completed'}</div>
+          <div class="tile-badge tb-w">✓ Tap to view evidence</div>
+        </div>
+        <div style="font-size:18px;color:rgba(255,255,255,.6);">✓</div>
+      </div></div>`;
+    const cls = ppCount ? 't-urgent' : '';
+    const badge = ppCount
+      ? `<div class="tile-badge tb-r">⚠️ ${ppCount} Pet Peeve${ppCount>1?'s':''}</div>`
+      : `<div class="tile-badge" style="background:var(--bg);color:var(--ink3);">Pending</div>`;
+    return `<div class="ttile ${cls} fadein" onclick="eNav('tasks',document.getElementById('enav-tasks'))">
+      <div class="ttile-inner">
+        <div class="tile-icon ${CAT_COLORS[t.cat]||'ic-b'}">${t.emoji}</div>
+        <div class="tile-body">
+          <div class="tile-name">${t.name}</div>
+          <div class="tile-sub">${t.cat}${t.dur?' · '+t.dur:''}</div>
+          ${badge}
+        </div>
+        <div style="font-size:22px;color:var(--ink3);">›</div>
+      </div></div>`;
+  }
 
-  // Insight
-  const total=tasks.length, done=tasks.filter(t=>t.completed).length;
-  const iEl=document.getElementById('insight-text');
-  if(iEl) iEl.textContent = total ? `${done} of ${total} tasks done today. ${done===total?'All complete — great day!':total-done+' remaining.'}`
-    : 'Add tasks to start tracking household progress.';
+  // Group by morning/afternoon/evening same as helper
+  function parseTime(ts) {
+    if (!ts) return null;
+    const m=ts.match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m) return null;
+    let h=parseInt(m[1]); const mn=parseInt(m[2]); const ap=m[3].toUpperCase();
+    if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0; return h*60+mn;
+  }
+  const morning   = tasks.filter(t=>{ const tm=parseTime(t.time); return !tm||tm<720; });
+  const afternoon = tasks.filter(t=>{ const tm=parseTime(t.time); return tm&&tm>=720&&tm<1080; });
+  const evening   = tasks.filter(t=>{ const tm=parseTime(t.time); return tm&&tm>=1080; });
+  let html='';
+  if(morning.length)   { html+=`<div class="sh">Morning</div>`+morning.map(empTaskTile).join(''); }
+  if(afternoon.length) { html+=`<div class="sh">Afternoon</div>`+afternoon.map(empTaskTile).join(''); }
+  if(evening.length)   { html+=`<div class="sh">Evening</div>`+evening.map(empTaskTile).join(''); }
+  if(!morning.length&&!afternoon.length&&!evening.length) html=tasks.map(empTaskTile).join('');
+  container.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1618,41 +1595,35 @@ function openTaskModal(taskId) {
   editingTaskId = taskId || null;
   const t = taskId ? tasks.find(x=>x.id===taskId) : null;
   document.getElementById('modal-task-title').textContent = t ? 'Edit Task' : 'New Task';
-  document.getElementById('nt-name').value     = t?.name     || '';
-  document.getElementById('nt-cat').value      = t?.cat      || 'Cleaning';
-  document.getElementById('nt-dur').value      = t?.dur      || '';
-  document.getElementById('nt-time').value     = t?.time     || '';
-  document.getElementById('nt-emoji').value    = t?.emoji    || '';
-  document.getElementById('nt-desc').value     = t?.description || '';
-  document.getElementById('nt-protip').value   = t?.proTip   || '';
-  document.getElementById('nt-supplies').value = (t?.supplies||[]).join(', ');
+  document.getElementById('nt-name').value   = t?.name        || '';
+  document.getElementById('nt-cat').value    = t?.cat         || 'Cleaning';
+  document.getElementById('nt-desc').value   = t?.description || '';
+  document.getElementById('nt-protip').value = t?.proTip      || '';
   openModal('modal-task');
 }
 
 async function saveTask() {
   const name = document.getElementById('nt-name').value.trim();
   if (!name) { toast('Please enter a task name'); return; }
-  const cat      = document.getElementById('nt-cat').value;
-  const dur      = document.getElementById('nt-dur').value.trim();
-  const time     = document.getElementById('nt-time').value.trim();
-  const emoji    = document.getElementById('nt-emoji').value.trim() || CAT_ICONS[cat]||'📋';
-  const desc     = document.getElementById('nt-desc').value.trim();
-  const proTip   = document.getElementById('nt-protip').value.trim();
-  const supplies = document.getElementById('nt-supplies').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const cat   = document.getElementById('nt-cat').value;
+  const emoji = CAT_ICONS[cat] || '📋';
+  const desc   = document.getElementById('nt-desc').value.trim();
+  const proTip = document.getElementById('nt-protip').value.trim();
 
-  const row = { name, cat, dur, time_slot:time, emoji, description:desc, pro_tip:proTip||null,
-    supplies:JSON.stringify(supplies), completed:false };
+  const row = { name, cat, emoji, description:desc, pro_tip:proTip||null,
+    supplies:JSON.stringify([]), completed:false };
 
   closeModal('modal-task');
   try {
     if (editingTaskId) {
       await db.updateTask(editingTaskId, row);
       const idx = tasks.findIndex(t=>t.id===editingTaskId);
-      if (idx>-1) Object.assign(tasks[idx], {name,cat,dur,time,emoji,description:desc,proTip,supplies});
+      if (idx>-1) Object.assign(tasks[idx], {name, cat, emoji, description:desc, proTip});
       toast(`✅ "${name}" updated`);
     } else {
       const saved = await db.insertTask(row);
-      tasks.push({id:saved.id, name, cat, dur, time, emoji, description:desc, proTip, supplies,
+      tasks.push({id:saved.id, name, cat, emoji, description:desc, proTip,
+        dur:'', time:'', supplies:[],
         completed:false, completedAt:null, petPeeves:[], noteText:null, notePhotos:[]});
       toast(`✅ "${name}" created`);
     }
@@ -1764,82 +1735,86 @@ function renderWeeklyPlanner() {
 
   if (!selectedDay) selectedDay = todayDayKey();
 
-  // Build day strip
+  // Build day strip with real calendar dates
   const strip = document.getElementById('week-strip');
   if (strip) {
     strip.innerHTML = DAY_KEYS.map((dk, i) => {
       const d = new Date(wsDate); d.setDate(d.getDate()+i);
+      const dayNum = d.getDate();
       const hasTasks = tasks.some(t => t.recurDay === dk) || weekPlan[dk];
       const isToday = dk === todayDayKey();
-      return `<div class="day-chip ${dk===selectedDay?'active':''}" onclick="selectDay('${dk}')" data-day="${dk}">
-        <div class="day-label">${dk.substring(0,3)}</div>
-        <div class="day-num">${d.getDate()}</div>
-        ${hasTasks||isToday?`<div class="day-dot"></div>`:'<div style="height:5px;"></div>'}
+      const isActive = dk === selectedDay;
+      return `<div class="day-chip ${isActive?'active':''}" onclick="selectDay('${dk}')" data-day="${dk}">
+        <div class="day-label">${dk.toUpperCase()}</div>
+        <div class="day-num">${dayNum}</div>
+        ${(hasTasks||isToday) ? `<div class="day-dot"></div>` : '<div style="height:5px;"></div>'}
       </div>`;
     }).join('');
-    // Auto-scroll to selected day
     setTimeout(()=>{
       const active = strip.querySelector('.day-chip.active');
       if(active) active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
     },100);
   }
 
-  renderSchedDayPanel();
+  renderSchedDayTasks();
   renderPoolGrid();
-  renderWeekProgress();
 }
 
 function selectDay(dk) {
   selectedDay = dk;
   selectedPoolTask = null;
-  renderWeeklyPlanner();
+  document.querySelectorAll('.day-chip').forEach(c=>c.classList.toggle('active', c.dataset.day===dk));
+  renderSchedDayTasks();
+  renderPoolGrid();
 }
 
-function renderSchedDayPanel() {
-  const panel = document.getElementById('sched-day-panel');
-  if (!panel) return;
-  const dayTasks = tasks.filter(t => t.recurDay === selectedDay || (t.time && tasks.find(x=>x.id===t.id)));
-  // Only show tasks explicitly for this day (by recur) or all tasks as reference
-  const scheduled = tasks.filter(t=>t.recurDay===selectedDay);
+function renderSchedDayTasks() {
+  const container = document.getElementById('sched-day-tasks');
+  if (!container) return;
+  const dayTasks = tasks.filter(t => t.recurDay === selectedDay);
   const meal = weekPlan[selectedDay];
   const mealRecipe = meal ? cookbook.find(r=>r.id==meal.recipeId) : null;
+  const dayName = DAY_NAMES[DAY_KEYS.indexOf(selectedDay)] || selectedDay;
 
-  let html = `<div class="card"><div style="padding:14px 16px 4px;">
-    <div style="font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Scheduled Today</div>
-    <div style="font-size:18px;font-weight:800;color:var(--ink);">${DAY_NAMES[DAY_KEYS.indexOf(selectedDay)]||selectedDay}</div>
-  </div>`;
+  let html = `<div style="padding:8px 16px 4px;font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;">${dayName} — ${dayTasks.length} task${dayTasks.length!==1?'s':''}</div>`;
 
-  // Scheduled tasks
-  if (scheduled.length) {
-    scheduled.forEach(t => {
-      html += `<div class="sched-task-row">
-        <div class="sched-time">${t.time||'—'}</div>
-        <div class="sched-icon ${CAT_COLORS[t.cat]||'ic-b'}">${t.emoji}</div>
-        <div class="sched-name">${t.name}</div>
-        <div class="sched-more">⋮</div>
-      </div>`;
+  if (dayTasks.length) {
+    dayTasks.forEach(t => {
+      const ppCount=(t.petPeeves||[]).length;
+      html+=`<div class="ttile ${ppCount?'t-urgent':''} fadein" onclick="eNav('tasks',document.getElementById('enav-tasks'))">
+        <div class="ttile-inner">
+          <div class="tile-icon ${CAT_COLORS[t.cat]||'ic-b'}">${t.emoji}</div>
+          <div class="tile-body">
+            <div class="tile-name">${t.name}</div>
+            <div class="tile-sub">${t.cat}${ppCount?` · ⚠️ ${ppCount} PP`:''}</div>
+          </div>
+          <button onclick="event.stopPropagation();unassignTask(${t.id})" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;">✕ Remove</button>
+        </div></div>`;
     });
   }
 
-  // Meal from week plan
   if (mealRecipe) {
-    html += `<div class="sched-task-row" onclick="openRecipeDetail(${mealRecipe.id})" style="cursor:pointer;">
-      <div class="sched-time" style="color:var(--green);">Dinner</div>
-      <div class="sched-icon ic-g">${mealRecipe.emoji}</div>
-      <div class="sched-name">${mealRecipe.name}</div>
-      <button onclick="event.stopPropagation();removeMealFromDay('${selectedDay}')" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
-    </div>`;
+    html+=`<div class="ttile fadein" style="border-left:4px solid var(--green);">
+      <div class="ttile-inner">
+        <div class="tile-icon ic-g">${mealRecipe.emoji}</div>
+        <div class="tile-body">
+          <div class="tile-name">${mealRecipe.name}</div>
+          <div class="tile-sub">Dinner · ${mealRecipe.cat}</div>
+        </div>
+        <button onclick="removeMealFromDay('${selectedDay}')" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
+      </div></div>`;
   }
 
-  // Drop zone
+  // Assign zone
   const hasSelected = selectedPoolTask !== null;
+  const selTask = hasSelected ? tasks.find(t=>t.id===selectedPoolTask) : null;
   html += `<div class="drop-zone" style="${hasSelected?'border-color:var(--blue);color:var(--blue);background:var(--blue-l);':''}"
     onclick="${hasSelected?`assignPoolTask('${selectedDay}')`:''}">${hasSelected
-      ? `✓ Tap to assign "${tasks.find(t=>t.id===selectedPoolTask)?.name||'task'}" to ${selectedDay}`
-      : '＋ Select a task from the pool below to assign'
-    }</div>
-  </div>`;
-  panel.innerHTML = html;
+      ? `✓ Tap here to assign "${selTask?.name||'task'}" to ${selectedDay}`
+      : `＋ Select a task from the pool below, then tap here to assign to ${dayName}`
+    }</div>`;
+
+  container.innerHTML = html;
 }
 
 function renderPoolGrid() {
@@ -1862,9 +1837,9 @@ function renderPoolGrid() {
 
 function selectPoolTask(taskId) {
   selectedPoolTask = selectedPoolTask === taskId ? null : taskId;
-  renderSchedDayPanel();
+  renderSchedDayTasks();
   renderPoolGrid();
-  if (selectedPoolTask) toast('Tap the day area above to assign');
+  if (selectedPoolTask) toast('Now tap the assign zone above');
 }
 
 async function assignPoolTask(dk) {
@@ -1873,34 +1848,51 @@ async function assignPoolTask(dk) {
   if (!t) return;
   t.recurDay = dk;
   selectedPoolTask = null;
-  try {
-    await db.updateTask(t.id, { recur_day: dk, recur: 'weekly' });
-    toast(`✅ "${t.name}" assigned to ${dk}`);
-  } catch(e) { toast('⚠️ Saved locally; DB sync failed'); }
+  try { await db.updateTask(t.id, { recur_day:dk, recur:'weekly' }); toast(`✅ "${t.name}" assigned to ${dk}`); }
+  catch(e) { toast('⚠️ Local only; DB sync failed'); }
+  renderWeeklyPlanner();
+}
+
+async function unassignTask(taskId) {
+  const t = tasks.find(x=>x.id===taskId);
+  if (!t) return;
+  t.recurDay = null;
+  try { await db.updateTask(taskId, { recur_day:null, recur:'none' }); toast(`"${t.name}" returned to pool`); }
+  catch(e) { toast('⚠️ Local only'); }
   renderWeeklyPlanner();
 }
 
 async function removeMealFromDay(dk) {
   delete weekPlan[dk];
   try { await db.deleteWeekPlanDay(currentWeekStart(), dk); } catch(e){}
-  renderWeeklyPlanner();
+  renderSchedDayTasks();
   toast('Meal removed from ' + dk);
 }
 
-function renderWeekProgress() {
-  const total = tasks.length;
-  const done  = tasks.filter(t=>t.completed).length;
-  const pct   = total ? Math.round((done/total)*100) : 0;
-  const remain= total - done;
-  const pctEl = document.getElementById('wp-pct-num');
-  const barEl = document.getElementById('wp-bar-fill');
-  const remEl = document.getElementById('wp-remain-text');
-  if (pctEl) pctEl.textContent = pct+'%';
-  if (barEl) barEl.style.width = pct+'%';
-  if (remEl) remEl.innerHTML = `You have <strong>${remain} task${remain!==1?'s':''}</strong> remaining this week.`;
+// Toggle to preview the helper's view (employer can check what the helper sees)
+function switchToHelperView() {
+  const prev = currentRole;
+  currentRole = 'helper';
+  document.getElementById('emp-nav').style.display = 'none';
+  document.getElementById('fdw-nav').style.display = 'flex';
+  goScreen('screen-f-schedule');
+  renderFdwSchedule();
+  renderFdwHome();
+  // Add a "Back to Employer View" button to the helper top bar temporarily
+  const topBar = document.querySelector('#screen-f-schedule .top-bar h1');
+  if (topBar) topBar.insertAdjacentHTML('afterend',
+    `<button onclick="switchBackToEmployer()" style="background:var(--amber-l);color:var(--amber);border:none;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-left:auto;">← Back to Employer</button>`);
+  toast('Previewing Helper view');
 }
 
-// Evidence modal (employer views helper's completed task proof)
+function switchBackToEmployer() {
+  currentRole = 'employer';
+  document.getElementById('fdw-nav').style.display = 'none';
+  document.getElementById('emp-nav').style.display = 'flex';
+  goScreen('screen-e-home');
+  renderEmployerHome();
+  toast('Back to Employer view');
+}
 function viewEvidence(taskId) {
   const t = tasks.find(x=>x.id===taskId);
   if (!t) return;
