@@ -707,19 +707,38 @@ html,body{height:100%;overflow:hidden;background:#e8eaf0;font-family:
     <h1>Cookbook</h1>
     <button class="bell-btn" onclick="openNotifPanel()">🔔</button>
   </div>
-  <div class="cookbook-import">
-    <div class="cookbook-import-title">📥 Import Recipe</div>
-    <div class="cookbook-import-sub">Upload a JSON recipe file to add it to your cookbook.</div>
-    <div class="import-area" onclick="document.getElementById('recipe-file-input').click()">
-      <div class="import-area-lbl">📄 Tap to choose JSON file</div>
-      <input id="recipe-file-input" type="file" accept=".json,application/json" style="display:none"
-        onchange="importRecipeJSON(event)"/>
-    </div>
-    <div class="import-status" id="import-status"></div>
+  <!-- Tab switcher -->
+  <div style="display:flex;gap:0;margin:12px 16px 0;background:var(--bg);border-radius:12px;padding:3px;">
+    <button id="tab-recipes" onclick="switchCookbookTab('recipes')"
+      style="flex:1;border:none;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;background:var(--white);color:var(--blue);box-shadow:var(--sh);">
+      📖 Recipes
+    </button>
+    <button id="tab-mealplan" onclick="switchCookbookTab('mealplan')"
+      style="flex:1;border:none;border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;background:transparent;color:var(--ink3);">
+      📅 Meal Plan
+    </button>
   </div>
-  <div class="sh">My Cookbook <span class="chip chip-blue" id="cookbook-count-badge">0 recipes</span></div>
-  <div class="recipe-grid" id="cookbook-grid"></div>
-  <div style="height:12px;"></div>
+  <!-- Recipes panel -->
+  <div id="cookbook-recipes-panel">
+    <div class="cookbook-import">
+      <div class="cookbook-import-title">📥 Import Recipe</div>
+      <div class="cookbook-import-sub">Upload a JSON recipe file to add it to your cookbook.</div>
+      <div class="import-area" onclick="document.getElementById('recipe-file-input').click()">
+        <div class="import-area-lbl">📄 Tap to choose JSON file</div>
+        <input id="recipe-file-input" type="file" accept=".json,application/json" style="display:none"
+          onchange="importRecipeJSON(event)"/>
+      </div>
+      <div class="import-status" id="import-status"></div>
+    </div>
+    <div class="sh">My Cookbook <span class="chip chip-blue" id="cookbook-count-badge">0 recipes</span></div>
+    <div class="recipe-grid" id="cookbook-grid"></div>
+    <div style="height:12px;"></div>
+  </div>
+  <!-- Meal plan panel -->
+  <div id="cookbook-mealplan-panel" style="display:none;">
+    <div class="sh">This Week's Meal Plan</div>
+    <div id="employer-meal-plan"></div>
+  </div>
 </div>
 
 <!-- EMPLOYER PROFILE -->
@@ -939,6 +958,7 @@ let tasks       = [];   // [{id, name, emoji, cat, dur, description, time_slot, 
 let cookbook    = [];   // [{id, name, emoji, cat, desc, time, servings, heroImg, ingredients, steps, url}]
 let weekPlan    = {};   // {Mon:{recipeId, pax}, Tue:...}
 let groceryItems= {};   // {key: {name, baseQty, adjustedQty, unit, status, submitted, approved}}
+let currentPax  = {};   // {recipeId: paxCount} — per-recipe pax override for current week plan
 let notifications = {employer:[], helper:[]};
 let unreadCount = 0;
 let notifId     = 1;
@@ -1088,7 +1108,14 @@ const db = {
     return data || [];
   },
   async upsertWeekPlan(row) {
-    const { error } = await _sb.from('week_plan').upsert(row, { onConflict: 'week_start,day_key' });
+    // row must include: week_start, day_key, recipe_id, recipe_name, pax
+    const { error } = await _sb.from('week_plan').upsert({
+      week_start:  row.week_start,
+      day_key:     row.day_key,
+      recipe_id:   row.recipe_id,
+      recipe_name: row.recipe_name || null,
+      pax:         row.pax || 4,
+    }, { onConflict: 'week_start,day_key' });
     if (error) console.error('upsertWeekPlan:', error);
   },
   async deleteWeekPlanDay(weekStart, day) {
@@ -1225,10 +1252,12 @@ async function loadAllData() {
     steps:       typeof r.steps === 'string' ? JSON.parse(r.steps || '[]') : (r.steps || []),
   }));
 
-  // Map week plan
+  // Map week plan + populate currentPax
   weekPlan = {};
+  currentPax = {};
   rawWeekPlan.forEach(row => {
     weekPlan[row.day_key] = { recipeId: row.recipe_id, recipeName: row.recipe_name, pax: row.pax || 4 };
+    if (row.recipe_id) currentPax[row.recipe_id] = row.pax || 4;
   });
 
   // Map grocery
@@ -1683,34 +1712,66 @@ async function savePP() {
   closeModal('modal-pp');
   toast('💾 Saving…');
 
-  let photoPath = null;
+  // Upload photo if one was selected — use ppPhotoDataUrl captured by handlePPPhotoSelect
+  let storagePath = null;
+  let displayUrl  = ppPhotoDataUrl; // keep data URL for immediate display
   if (ppPhotoDataUrl) {
     try {
-      const file = event?.target?.files?.[0];
       const path = `pp-${editingPPTaskId}-${Date.now()}`;
-      photoPath = await uploadPhoto('evidence-photos', path, ppPhotoDataUrl);
-    } catch(e) { toast('⚠️ Photo upload failed, saving without photo'); }
+      storagePath = await uploadPhoto('evidence-photos', path, ppPhotoDataUrl);
+      // storagePath is the storage path string (private bucket)
+    } catch(e) {
+      console.error('PP photo upload error:', e);
+      toast('⚠️ Photo upload failed — saving without photo');
+      displayUrl  = null;
+      storagePath = null;
+    }
   }
 
   try {
     if (editingPPId) {
+      // Editing existing PP
       const updateRow = { title, note };
-      if (photoPath) updateRow.employer_photo_url = photoPath;
+      if (storagePath) updateRow.employer_photo_url = storagePath;
       await db.updatePP(editingPPId, updateRow);
-      const t = tasks.find(x=>x.id===editingPPTaskId);
+      // Update in-memory object — keep photoUrl as the data URL for immediate display
+      const t  = tasks.find(x=>x.id===editingPPTaskId);
       const pp = t?.petPeeves?.find(p=>p.id===editingPPId);
-      if (pp) { pp.title=title; pp.note=note; if(photoPath) pp.photoUrl=ppPhotoDataUrl; }
+      if (pp) {
+        pp.title = title;
+        pp.note  = note;
+        if (displayUrl) pp.photoUrl = displayUrl;
+        if (storagePath) pp._photoPath = storagePath;
+      }
       toast('✅ Pet peeve updated');
     } else {
-      const saved = await db.insertPP({ task_id:editingPPTaskId, title, note, emoji:'⚠️',
-        bg:'#FEE2E2', employer_photo_url: photoPath||null });
+      // New PP
+      const saved = await db.insertPP({
+        task_id: editingPPTaskId, title, note,
+        emoji: '⚠️', bg: '#FEE2E2',
+        employer_photo_url: storagePath || null,
+      });
       const t = tasks.find(x=>x.id===editingPPTaskId);
-      if (t) t.petPeeves.push({ id:saved.id, taskId:editingPPTaskId, title, note,
-        emoji:'⚠️', bg:'#FEE2E2', confirmed:false,
-        photoUrl: ppPhotoDataUrl||null, _photoPath: photoPath||null });
+      if (t) {
+        t.petPeeves.push({
+          id:         saved.id,
+          taskId:     editingPPTaskId,
+          title, note,
+          emoji:      '⚠️',
+          bg:         '#FEE2E2',
+          confirmed:  false,
+          photoUrl:   displayUrl  || null, // data URL for display
+          _photoPath: storagePath || null, // storage path for DB
+        });
+      }
       toast('✅ Pet peeve added');
     }
-  } catch(e) { toast('❌ Save failed: '+e.message); return; }
+  } catch(e) {
+    toast('❌ Save failed: ' + e.message);
+    console.error('savePP error:', e);
+    return;
+  }
+  ppPhotoDataUrl = null; // clear after save
   renderTaskLibrary();
 }
 
@@ -1959,6 +2020,25 @@ function renderCookbook() {
     </div>`).join('');
 }
 
+function switchCookbookTab(tab) {
+  const recipesPanel  = document.getElementById('cookbook-recipes-panel');
+  const mealplanPanel = document.getElementById('cookbook-mealplan-panel');
+  const tabR = document.getElementById('tab-recipes');
+  const tabM = document.getElementById('tab-mealplan');
+  if (tab === 'recipes') {
+    recipesPanel.style.display  = '';
+    mealplanPanel.style.display = 'none';
+    tabR.style.background = 'var(--white)'; tabR.style.color = 'var(--blue)'; tabR.style.boxShadow = 'var(--sh)';
+    tabM.style.background = 'transparent'; tabM.style.color = 'var(--ink3)'; tabM.style.boxShadow = 'none';
+  } else {
+    recipesPanel.style.display  = 'none';
+    mealplanPanel.style.display = '';
+    tabM.style.background = 'var(--white)'; tabM.style.color = 'var(--blue)'; tabM.style.boxShadow = 'var(--sh)';
+    tabR.style.background = 'transparent'; tabR.style.color = 'var(--ink3)'; tabR.style.boxShadow = 'none';
+    renderEmployerMealPlan();
+  }
+}
+
 async function uploadHeroPhoto(event, recipeId) {
   const file = event.target.files[0];
   if (!file) return;
@@ -2041,44 +2121,256 @@ async function deleteRecipe(id) {
 }
 
 function openRecipeDetail(id) {
-  const r = cookbook.find(x=>x.id==id);
-  if (!r) return;
+  // Use loose == to handle both string IDs (from JSON) and numeric IDs (from DB)
+  const r = cookbook.find(x => x.id == id);
+  if (!r) { toast('Recipe not found'); return; }
   const ingGroups = {};
   (r.ingredients||[]).forEach(ing => {
-    const g = ing.group||'Ingredients';
-    if (!ingGroups[g]) ingGroups[g]=[];
+    const g = ing.group || 'Ingredients';
+    if (!ingGroups[g]) ingGroups[g] = [];
     ingGroups[g].push(ing);
   });
   const ingHtml = Object.keys(ingGroups).map(g=>`
     <div class="ingredient-group">
-      ${Object.keys(ingGroups).length>1?`<div class="ingr-group-title">${g}</div>`:''}
+      ${Object.keys(ingGroups).length > 1 ? `<div class="ingr-group-title">${g}</div>` : ''}
       ${ingGroups[g].map(i=>`
         <div class="ingr-row">
           <div class="ingr-qty">${i.qty||''} ${i.unit||''}</div>
-          <div class="ingr-name">${i.name||''}</div>
+          <div class="ingr-name">${i.name||i.ingredient||''}</div>
           ${i.note?`<div class="ingr-note">${i.note}</div>`:''}
         </div>`).join('')}
     </div>`).join('');
   const stepsHtml = (r.steps||[]).map((s,i)=>`
     <div class="step-row">
       <div class="step-num">${i+1}</div>
-      <div class="step-text">${typeof s==='string'?s:(s.text||s.description||JSON.stringify(s))}</div>
+      <div class="step-text">${typeof s==='string'?s:(s.text||s.description||s.instruction||JSON.stringify(s))}</div>
     </div>`).join('');
-  const backNav = currentRole==='employer' ? `eNav('cookbook',document.getElementById('enav-cookbook'))` : `fNav('schedule',document.getElementById('fnav-schedule'))`;
+  const backNav = currentRole==='employer'
+    ? `eNav('cookbook',document.getElementById('enav-cookbook'))`
+    : `fNav('schedule',document.getElementById('fnav-schedule'))`;
   document.getElementById('recipe-detail-content').innerHTML = `
     <div class="safe-top"></div>
     <div class="rdet-hero">
-      ${r.heroImg?`<img src="${r.heroImg}" alt="${r.name}"/>`:`<div class="rdet-hero-placeholder">${r.emoji}</div>`}
+      ${r.heroImg ? `<img src="${r.heroImg}" alt="${r.name}"/>` : `<div class="rdet-hero-placeholder">${r.emoji||'🍽'}</div>`}
       <button class="rdet-back" onclick="${backNav}">← Back</button>
     </div>
-    <div style="padding:16px;">
+    <div style="padding:16px 16px 0;">
       <div class="rdet-title">${r.name}</div>
-      <div class="rdet-meta">${r.cat} · ${r.time||'—'} · ${r.servings||4} servings${r.url?` · <a href="${r.url}" target="_blank" style="color:var(--blue);">Source ↗</a>`:''}</div>
-      ${r.desc?`<div style="font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:16px;">${r.desc}</div>`:''}
-      ${r.ingredients?.length?`<div class="sh" style="padding:0;margin:0 0 12px;">Ingredients</div><div style="background:var(--white);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh);margin-bottom:16px;">${ingHtml}</div>`:''}
-      ${r.steps?.length?`<div class="sh" style="padding:0;margin:0 0 12px;">Method</div><div style="background:var(--white);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh);margin-bottom:16px;">${stepsHtml}</div>`:''}
-    </div>`;
+      <div class="rdet-meta">${r.cat||'—'} · ${r.time||'—'} · ${r.servings||4} servings${r.url?` · <a href="${r.url}" target="_blank" style="color:var(--blue);">Source ↗</a>`:''}</div>
+      ${r.desc?`<div style="font-size:14px;color:var(--ink2);line-height:1.6;margin:10px 0 16px;">${r.desc}</div>`:''}
+    </div>
+    ${currentRole==='employer' ? `
+    <div style="padding:0 16px 12px;">
+      <div style="background:var(--blue-l);border:1.5px solid var(--blue-m);border-radius:14px;padding:14px 16px;">
+        <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:10px;">📅 Add to Meal Plan</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          ${DAY_KEYS.map(dk=>`<button onclick="assignMealToDay('${dk}',${r.id})"
+            style="background:${weekPlan[dk]?.recipeId==r.id?'var(--blue)':'var(--white)'};
+            color:${weekPlan[dk]?.recipeId==r.id?'#fff':'var(--ink)'};
+            border:1.5px solid ${weekPlan[dk]?.recipeId==r.id?'var(--blue)':'var(--line)'};
+            border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">
+            ${dk}${weekPlan[dk]?.recipeId==r.id?' ✓':''}
+          </button>`).join('')}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:13px;color:var(--ink2);">Pax:</span>
+          <button onclick="changePax(-1,${r.id})" class="qty-btn">−</button>
+          <span id="pax-display-${r.id}" style="font-size:15px;font-weight:800;color:var(--ink);min-width:30px;text-align:center;">${currentPax[r.id]||r.servings||4}</span>
+          <button onclick="changePax(1,${r.id})" class="qty-btn">＋</button>
+          <span style="font-size:12px;color:var(--ink3);">people</span>
+        </div>
+      </div>
+    </div>` : ''}
+    ${r.ingredients?.length ? `
+    <div class="sh" style="padding:0 16px;margin:4px 0 8px;">Ingredients</div>
+    <div style="background:var(--white);border-radius:var(--r);margin:0 16px 16px;padding:12px 14px;box-shadow:var(--sh);">${ingHtml}</div>` : ''}
+    ${r.steps?.length ? `
+    <div class="sh" style="padding:0 16px;margin:4px 0 8px;">Method</div>
+    <div style="background:var(--white);border-radius:var(--r);margin:0 16px 16px;padding:12px 14px;box-shadow:var(--sh);">${stepsHtml}</div>` : ''}
+    <div style="height:16px;"></div>`;
   goScreen('screen-recipe-detail');
+}
+
+// ═══════════════════════════════════════════════════
+// MEAL PLANNING — assign recipe to day, pax, generate grocery list
+// ═══════════════════════════════════════════════════
+async function assignMealToDay(dk, recipeId) {
+  const r = cookbook.find(x => x.id == recipeId);
+  if (!r) return;
+  const pax = currentPax[recipeId] || r.servings || 4;
+  // Toggle: if already assigned this recipe to this day, remove it
+  if (weekPlan[dk]?.recipeId == recipeId) {
+    delete weekPlan[dk];
+    try { await db.deleteWeekPlanDay(currentWeekStart(), dk); } catch(e){}
+    toast(`Removed ${r.name} from ${dk}`);
+  } else {
+    weekPlan[dk] = { recipeId: r.id, recipeName: r.name, pax };
+    try {
+      await db.upsertWeekPlan({
+        week_start:  currentWeekStart(),
+        day_key:     dk,
+        recipe_id:   r.id,
+        recipe_name: r.name,
+        pax,
+      });
+    } catch(e) { toast('⚠️ Saved locally; DB sync failed'); }
+    toast(`✅ ${r.name} → ${dk} (${pax} pax)`);
+  }
+  // Re-render detail to update button states
+  openRecipeDetail(recipeId);
+}
+
+function changePax(delta, recipeId) {
+  const r = cookbook.find(x => x.id == recipeId);
+  if (!r) return;
+  const cur = currentPax[recipeId] || r.servings || 4;
+  const next = Math.max(1, cur + delta);
+  currentPax[recipeId] = next;
+  const el = document.getElementById(`pax-display-${recipeId}`);
+  if (el) el.textContent = next;
+  // Update any existing week plan entries for this recipe
+  Object.keys(weekPlan).forEach(dk => {
+    if (weekPlan[dk]?.recipeId == recipeId) {
+      weekPlan[dk].pax = next;
+      db.upsertWeekPlan({
+        week_start: currentWeekStart(), day_key: dk,
+        recipe_id: recipeId, recipe_name: r.name, pax: next,
+      }).catch(()=>{});
+    }
+  });
+}
+
+// ── Employer: view the current week plan and release grocery list ──
+function renderEmployerMealPlan() {
+  // Called from the cookbook screen's "Week Plan" tab or weekly planner
+  // Shows the 7-day meal plan with assigned recipes and a "Generate Grocery List" button
+  const container = document.getElementById('employer-meal-plan');
+  if (!container) return;
+  const hasMeals = Object.keys(weekPlan).length > 0;
+  if (!hasMeals) {
+    container.innerHTML = `<div style="padding:20px 16px;text-align:center;color:var(--ink3);font-size:13px;">
+      Open a recipe from the cookbook and tap a weekday to assign it to the meal plan.</div>`;
+    return;
+  }
+  const groceryGenerated = Object.keys(groceryItems).length > 0;
+  const anySubmitted = Object.values(groceryItems).some(i=>i.submitted);
+  container.innerHTML = `
+    <div style="padding:0 16px 8px;">
+      ${DAY_KEYS.map(dk => {
+        const entry = weekPlan[dk];
+        if (!entry) return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
+          <div style="width:32px;font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;">${dk}</div>
+          <div style="font-size:13px;color:var(--ink3);font-style:italic;">No meal planned</div>
+        </div>`;
+        const r = cookbook.find(x=>x.id==entry.recipeId);
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
+          <div style="width:32px;font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;">${dk}</div>
+          <div style="font-size:22px;">${r?.emoji||'🍽'}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:700;color:var(--ink);">${entry.recipeName}</div>
+            <div style="font-size:11px;color:var(--ink3);">${entry.pax||4} pax</div>
+          </div>
+          <button onclick="removeMealFromDay('${dk}')"
+            style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;
+            padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;">✕</button>
+        </div>`;
+      }).join('')}
+    </div>
+    ${!anySubmitted ? `
+    <div style="padding:0 16px 16px;">
+      <button onclick="generateGroceryList()"
+        style="width:100%;background:var(--green);color:#fff;border:none;border-radius:14px;
+        padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">
+        ${groceryGenerated ? '🔄 Re-generate Grocery List' : '🛒 Generate Grocery List'}
+      </button>
+      ${groceryGenerated ? `<button onclick="releaseGroceryList()"
+        style="width:100%;background:var(--blue);color:#fff;border:none;border-radius:14px;
+        padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;">
+        📤 Release List to Helper
+      </button>` : ''}
+    </div>` :
+    `<div style="margin:0 16px 16px;background:var(--green-l);border-radius:14px;padding:14px;display:flex;gap:10px;align-items:center;">
+      <div style="font-size:22px;">✅</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--green);">Grocery list submitted by helper</div>
+        <div style="font-size:12px;color:var(--ink3);margin-top:2px;">Review and approve below</div>
+      </div>
+    </div>
+    <div style="padding:0 16px 16px;">
+      <button onclick="approveGroceryList()"
+        style="width:100%;background:var(--blue);color:#fff;border:none;border-radius:14px;
+        padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">
+        ✅ Approve Grocery List
+      </button>
+    </div>`}`;
+}
+
+function generateGroceryList() {
+  // Aggregate ingredients from all assigned recipes, scaled by pax
+  const newItems = {};
+  Object.values(weekPlan).forEach(entry => {
+    const r = cookbook.find(x => x.id == entry.recipeId);
+    if (!r || !r.ingredients?.length) return;
+    const scale = (entry.pax || 4) / (r.servings || 4);
+    r.ingredients.forEach(ing => {
+      const name = ing.name || ing.ingredient || '';
+      if (!name) return;
+      const key = name.toLowerCase().replace(/\s+/g, '_');
+      const qty  = parseFloat(ing.qty || ing.quantity || 0) * scale;
+      if (newItems[key]) {
+        // Same ingredient from multiple recipes — add quantities if same unit
+        if (newItems[key].unit === (ing.unit||'')) {
+          newItems[key].baseQty     = (newItems[key].baseQty || 0) + qty;
+          newItems[key].adjustedQty = newItems[key].baseQty;
+        }
+        // Different units — add as separate entry with suffix
+        else {
+          const key2 = key + '_' + (ing.unit||'x');
+          if (!newItems[key2]) {
+            newItems[key2] = { name, baseQty: qty, adjustedQty: qty, unit: ing.unit||'', status: 'need', submitted: false, approved: false };
+          }
+        }
+      } else {
+        newItems[key] = { name, baseQty: qty, adjustedQty: qty, unit: ing.unit||'', status: 'need', submitted: false, approved: false };
+      }
+    });
+  });
+  groceryItems = newItems;
+  // Persist to DB
+  const ws = currentWeekStart();
+  Object.entries(newItems).forEach(([k,v]) => {
+    db.upsertGroceryItem({ week_start:ws, item_key:k, name:v.name,
+      base_qty:v.baseQty, adjusted_qty:v.adjustedQty, unit:v.unit, status:'need', submitted:false })
+    .catch(()=>{});
+  });
+  toast(`✅ Grocery list generated — ${Object.keys(newItems).length} items`);
+  renderEmployerMealPlan();
+}
+
+async function releaseGroceryList() {
+  if (!Object.keys(groceryItems).length) { toast('Generate the list first'); return; }
+  addNotification('helper', {
+    text: '🛒 Your employer has released this week\'s grocery list. Please check the fridge and update quantities.',
+    icon: '🛒', type: 'grocery'
+  });
+  toast('✅ Grocery list released to helper!');
+  renderEmployerMealPlan();
+}
+
+async function approveGroceryList() {
+  const keys = Object.keys(groceryItems);
+  for (const k of keys) {
+    groceryItems[k].approved = true;
+    await db.upsertGroceryItem({
+      week_start: currentWeekStart(), item_key: k, name: groceryItems[k].name,
+      base_qty: groceryItems[k].baseQty, adjusted_qty: groceryItems[k].adjustedQty,
+      unit: groceryItems[k].unit, status: groceryItems[k].status,
+      submitted: true, approved: true,
+    }).catch(()=>{});
+  }
+  addNotification('helper', { text:'✅ Employer has approved the grocery list.', icon:'✅', type:'grocery' });
+  toast('✅ Grocery list approved!');
+  renderEmployerMealPlan();
 }
 
 // ═══════════════════════════════════════════════════
