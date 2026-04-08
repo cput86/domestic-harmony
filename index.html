@@ -387,6 +387,7 @@ html,body{height:100%;overflow:hidden;background:#e8eaf0;font-family:
 
 /* ── RECIPE DETAIL ── */
 #screen-recipe-detail{z-index:50;}
+#screen-f-cookbook{z-index:2;}
 .rdet-hero{height:220px;position:relative;overflow:hidden;}
 .rdet-hero img{width:100%;height:100%;object-fit:cover;display:block;}
 .rdet-hero-placeholder{width:100%;height:100%;background:linear-gradient(135deg,#fff7ed,#fef9c3);
@@ -807,52 +808,41 @@ html,body{height:100%;overflow:hidden;background:#e8eaf0;font-family:
 
 <!-- ═══════════ HELPER SCREENS ═══════════ -->
 
-<!-- HELPER HOME -->
+<!-- HELPER HOME (TODAY view — tasks for this day) -->
 <div class="screen" id="screen-f-home">
   <div class="safe-top"></div>
   <div class="top-bar">
-    <div class="avatar" id="hlp-avatar" onclick="fNav('profile')" style="background:#16a34a;">H</div>
-    <h1>Domestic Harmony</h1>
+    <div class="avatar" id="hlp-avatar" style="background:#16a34a;">H</div>
+    <h1>Today</h1>
     <button class="bell-btn" onclick="openNotifPanel()">
       🔔<span class="notif-badge" id="hlp-notif-badge" style="display:none"></span>
     </button>
   </div>
-  <div class="home-hero" style="padding-bottom:12px;">
-    <div class="home-date" id="fdw-today-date-lbl"></div>
-    <div class="home-title" style="font-size:24px;">Good <span id="fdw-greeting-time">morning</span>,<br><span id="fdw-name-lbl">Helper</span>!</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 4px;">
+    <div>
+      <div class="home-date" id="fdw-today-date-lbl"></div>
+      <div style="font-size:22px;font-weight:800;color:var(--ink);" id="fdw-name-lbl">Daily Tasks</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:28px;font-weight:800;color:var(--blue);" id="fdw-home-pct">0%</div>
+      <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;">Done Today</div>
+    </div>
   </div>
-  <div class="ring-row" id="fdw-category-rings"></div>
-  <div style="height:12px;"></div>
-  <div class="card">
-    <div style="padding:14px 16px 8px;font-size:15px;font-weight:800;color:var(--ink);">Up Next</div>
-    <div id="fdw-home-next"></div>
-  </div>
-  <div class="card">
-    <div style="padding:14px 16px 8px;font-size:15px;font-weight:800;color:var(--ink);">Recent Activity</div>
-    <div id="fdw-activity-feed"></div>
-  </div>
+  <div class="pbar-wrap"><div class="pbar-fill" id="fdw-home-pbar" style="width:0%;background:var(--blue);"></div></div>
+  <div id="fdw-home-task-list" style="padding-top:4px;"></div>
 </div>
 
-<!-- HELPER SCHEDULE -->
+<!-- HELPER SCHEDULE — calendar view, tap day to see tasks -->
 <div class="screen" id="screen-f-schedule">
   <div class="safe-top"></div>
   <div class="top-bar">
-    <div class="avatar" id="hlp-avatar-s" onclick="fNav('profile')" style="background:#16a34a;">H</div>
-    <h1>My Schedule</h1>
+    <div class="avatar" id="hlp-avatar-s" style="background:#16a34a;">H</div>
+    <h1>Schedule</h1>
     <button class="bell-btn" onclick="openNotifPanel()">🔔</button>
   </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 4px;">
-    <div>
-      <div class="home-date" id="fdw-sched-date"></div>
-      <div style="font-size:22px;font-weight:800;color:var(--ink);">Daily Routine</div>
-    </div>
-    <div style="text-align:right;">
-      <div style="font-size:28px;font-weight:800;color:var(--blue);" id="fdw-pct-lbl">0%</div>
-      <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;">Day Progress</div>
-    </div>
-  </div>
-  <div class="pbar-wrap"><div class="pbar-fill" id="fdw-pbar" style="width:0%;background:var(--blue);"></div></div>
-  <div id="fdw-task-list" style="padding-top:4px;"></div>
+  <div style="padding:12px 16px 4px;font-size:15px;font-weight:800;color:var(--ink);" id="fdw-week-month-label"></div>
+  <div class="week-strip" id="fdw-week-strip"></div>
+  <div id="fdw-sched-day-tasks" style="margin-top:4px;"></div>
 </div>
 
 <!-- HELPER TASK DETAIL -->
@@ -1598,14 +1588,22 @@ function renderEmployerHome() {
     let h=parseInt(m[1]); const mn=parseInt(m[2]); const ap=m[3].toUpperCase();
     if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0; return h*60+mn;
   }
-  const morning   = tasks.filter(t=>{ const tm=parseTime(t.time); return !tm||tm<720; });
-  const afternoon = tasks.filter(t=>{ const tm=parseTime(t.time); return tm&&tm>=720&&tm<1080; });
-  const evening   = tasks.filter(t=>{ const tm=parseTime(t.time); return tm&&tm>=1080; });
+  const today = todayDayKey();
+  // Show tasks assigned to today (recurDay or recurDays contains today) OR tasks with no day assignment
+  const todayTasks = tasks.filter(t =>
+    t.recurDay === today ||
+    (t.recurDays && t.recurDays.includes(today)) ||
+    (!t.recurDay && (!t.recurDays || !t.recurDays.length))
+  );
+  const morning   = todayTasks.filter(t=>{ const tm=parseTime(t.time); return !tm||tm<720; });
+  const afternoon = todayTasks.filter(t=>{ const tm=parseTime(t.time); return tm&&tm>=720&&tm<1080; });
+  const evening   = todayTasks.filter(t=>{ const tm=parseTime(t.time); return tm&&tm>=1080; });
   let html='';
-  if(morning.length)   { html+=`<div class="sh">Morning</div>`+morning.map(empTaskTile).join(''); }
-  if(afternoon.length) { html+=`<div class="sh">Afternoon</div>`+afternoon.map(empTaskTile).join(''); }
-  if(evening.length)   { html+=`<div class="sh">Evening</div>`+evening.map(empTaskTile).join(''); }
-  if(!morning.length&&!afternoon.length&&!evening.length) html=tasks.map(empTaskTile).join('');
+  if(morning.length)   { html+='<div class="sh">Morning</div>'+morning.map(empTaskTile).join(''); }
+  if(afternoon.length) { html+='<div class="sh">Afternoon</div>'+afternoon.map(empTaskTile).join(''); }
+  if(evening.length)   { html+='<div class="sh">Evening</div>'+evening.map(empTaskTile).join(''); }
+  if(!todayTasks.length) html='<div style="padding:32px 16px;text-align:center;color:var(--ink3);"><div style="font-size:36px;margin-bottom:8px;">📋</div><div style="font-size:14px;">No tasks scheduled for today.<br>Assign tasks to today in the Schedule tab.</div></div>';
+  else if(!morning.length&&!afternoon.length&&!evening.length) html=todayTasks.map(empTaskTile).join('');
   container.innerHTML = html;
 }
 
@@ -1914,7 +1912,11 @@ function selectDay(dk) {
 function renderSchedDayTasks() {
   const container = document.getElementById('sched-day-tasks');
   if (!container) return;
-  const dayTasks = tasks.filter(t => t.recurDay === selectedDay);
+  // Match tasks assigned to this day via either recurDay (single) or recurDays (array)
+  const dayTasks = tasks.filter(t =>
+    t.recurDay === selectedDay ||
+    (t.recurDays && t.recurDays.includes(selectedDay))
+  );
   const meal = weekPlan[selectedDay];
   const mealRecipe = meal ? cookbook.find(r=>r.id==meal.recipeId) : null;
   const dayName = DAY_NAMES[DAY_KEYS.indexOf(selectedDay)] || selectedDay;
@@ -1964,18 +1966,34 @@ function renderPoolGrid() {
   const grid = document.getElementById('pool-grid');
   const badge = document.getElementById('pool-count-badge');
   if (!grid) return;
-  const pool = tasks.filter(t => !t.recurDay);
-  if (badge) badge.textContent = pool.length + ' available';
-  if (!pool.length) {
-    grid.innerHTML = '<div style="padding:16px;color:var(--ink3);font-size:13px;grid-column:1/-1;">All tasks are assigned to specific days.</div>';
+  if (!tasks.length) {
+    badge && (badge.textContent = '0 tasks');
+    grid.innerHTML = '<div style="padding:16px;color:var(--ink3);font-size:13px;grid-column:1/-1;">No tasks yet. Add tasks in the Tasks tab first.</div>';
     return;
   }
-  grid.innerHTML = pool.map(t=>`
-    <div class="pool-card ${selectedPoolTask===t.id?'selected':''}" onclick="selectPoolTask(${t.id})">
-      <div class="pool-card-icon">${t.emoji}</div>
+  badge && (badge.textContent = tasks.length + ' task' + (tasks.length!==1?'s':''));
+  grid.innerHTML = tasks.map(t => {
+    // Collect all days this task is assigned to (recurDay single + recurDays array)
+    const assignedDays = [];
+    if (t.recurDay) assignedDays.push(t.recurDay);
+    if (t.recurDays && t.recurDays.length) {
+      t.recurDays.forEach(d => { if (!assignedDays.includes(d)) assignedDays.push(d); });
+    }
+    const isOnSelectedDay = assignedDays.includes(selectedDay);
+    const isSelected = selectedPoolTask === t.id;
+    const dayChips = assignedDays.length
+      ? assignedDays.map(d => `<span style="background:${d===selectedDay?'var(--green-l)':'var(--blue-l)'};color:${d===selectedDay?'var(--green)':'var(--blue)'};font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;">${d}</span>`).join('')
+      : '<span style="font-size:10px;color:var(--ink3);">Unassigned</span>';
+    return `<div class="pool-card ${isSelected?'selected':''}" onclick="selectPoolTask(${t.id})"
+      style="${isOnSelectedDay?'border:2px solid var(--green);background:var(--green-l);':''} ">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-size:22px;">${t.emoji}</span>
+        ${isOnSelectedDay?'<span style="font-size:10px;font-weight:800;color:var(--green);">✓ On this day</span>':''}
+      </div>
       <div class="pool-card-name">${t.name}</div>
-      <div class="pool-card-cat">${t.cat}</div>
-    </div>`).join('');
+      <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">${dayChips}</div>
+    </div>`;
+  }).join('');
 }
 
 function selectPoolTask(taskId) {
@@ -1989,10 +2007,28 @@ async function assignPoolTask(dk) {
   if (!selectedPoolTask || !dk) return;
   const t = tasks.find(x=>x.id===selectedPoolTask);
   if (!t) return;
-  t.recurDay = dk;
+  // Add dk to recurDays if not already there; toggle off if already assigned
+  if (!t.recurDays) t.recurDays = [];
+  const alreadyOn = t.recurDays.includes(dk) || t.recurDay === dk;
+  if (alreadyOn) {
+    // Remove from this day
+    t.recurDays = t.recurDays.filter(d=>d!==dk);
+    if (t.recurDay === dk) t.recurDay = t.recurDays[0] || null;
+    toast(`"${t.name}" removed from ${dk}`);
+  } else {
+    // Add to this day
+    t.recurDays.push(dk);
+    if (!t.recurDay) t.recurDay = dk;
+    toast(`✅ "${t.name}" assigned to ${dk}`);
+  }
   selectedPoolTask = null;
-  try { await db.updateTask(t.id, { recur_day:dk, recur:'weekly' }); toast(`✅ "${t.name}" assigned to ${dk}`); }
-  catch(e) { toast('⚠️ Local only; DB sync failed'); }
+  try {
+    await db.updateTask(t.id, {
+      recur:     t.recurDays.length ? 'weekly' : 'none',
+      recur_day: t.recurDay || null,
+      recur_days: JSON.stringify(t.recurDays),
+    });
+  } catch(e) { console.warn('assign sync failed', e); }
   renderWeeklyPlanner();
 }
 
@@ -2227,7 +2263,7 @@ function openRecipeDetail(id) {
     </div>`).join('');
   const backNav = currentRole==='employer'
     ? `eNav('cookbook',document.getElementById('enav-cookbook'))`
-    : `fNav('schedule',document.getElementById('fnav-schedule'))`;
+    : `fNav('cookbook',document.getElementById('fnav-cookbook'))`;
   document.getElementById('recipe-detail-content').innerHTML = `
     <div class="safe-top"></div>
     <div class="rdet-hero">
@@ -2454,78 +2490,115 @@ async function approveGroceryList() {
 }
 
 // ═══════════════════════════════════════════════════
-// HELPER HOME
+// HELPER HOME — Today's tasks (same logic as employer Today)
 // ═══════════════════════════════════════════════════
 function renderFdwHome() {
-  const cats = ['Cleaning','Cooking','Child Care'];
-  const catColors = {Cleaning:'#1d4ed8',Cooking:'#16a34a','Child Care':'#d97706'};
-  const rings = document.getElementById('fdw-category-rings');
-  if (rings) {
-    rings.innerHTML = cats.map(cat=>{
-      const ct = tasks.filter(t=>t.cat===cat);
-      const done = ct.filter(t=>t.completed).length;
-      const total = ct.length;
-      const pct = total ? Math.round((done/total)*100) : 0;
-      const color = catColors[cat];
-      const r2=28, circ=2*Math.PI*r2, dash=(pct/100)*circ;
-      return `<div class="ring-card" onclick="fNav('schedule',document.getElementById('fnav-schedule'))">
-        <div class="ring-svg">
-          <svg width="64" height="64" viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="${r2}" fill="none" stroke="#e5e7eb" stroke-width="5"/>
-            <circle cx="32" cy="32" r="${r2}" fill="none" stroke="${color}" stroke-width="5"
-              stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"/>
-          </svg>
-          <div class="ring-icon">${CAT_ICONS[cat]}</div>
+  const container = document.getElementById('fdw-home-task-list');
+  if (!container) return;
+  const today = todayDayKey();
+
+  // Tasks for today: assigned to today OR unassigned (daily tasks show every day)
+  const todayTasks = tasks.filter(t =>
+    t.recurDay === today ||
+    (t.recurDays && t.recurDays.includes(today)) ||
+    t.recur === 'daily' ||
+    (!t.recurDay && (!t.recurDays || !t.recurDays.length))
+  );
+
+  const total = todayTasks.length;
+  const done  = todayTasks.filter(t=>t.completed).length;
+  const pct   = total ? Math.round((done/total)*100) : 0;
+
+  const pctEl = document.getElementById('fdw-home-pct');
+  const pbar  = document.getElementById('fdw-home-pbar');
+  if (pctEl) pctEl.textContent = pct+'%';
+  if (pbar)  { pbar.style.width=pct+'%'; pbar.style.background=pct<30?'var(--red)':pct<70?'var(--amber)':'var(--green)'; }
+
+  if (!todayTasks.length) {
+    container.innerHTML='<div style="padding:40px 16px;text-align:center;color:var(--ink3);"><div style="font-size:36px;margin-bottom:8px;">✨</div><div style="font-size:14px;">No tasks for today.</div></div>';
+    return;
+  }
+
+  function parseTime(ts) {
+    if (!ts) return null;
+    const m=ts.match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m) return null;
+    let h=parseInt(m[1]); const mn=parseInt(m[2]); const ap=m[3].toUpperCase();
+    if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0; return h*60+mn;
+  }
+
+  function fdwTaskTile(t) {
+    const ppCount=(t.petPeeves||[]).length;
+    if (t.completed) return `<div class="ttile t-done fadein" onclick="openFdwDetail(${t.id})">
+      <div class="ttile-inner">
+        <div class="tile-icon ic-w">${t.emoji}</div>
+        <div class="tile-body">
+          <div class="tile-name w">${t.name}</div>
+          <div class="tile-sub w">${t.completedAt?'Done at '+t.completedAt:'Completed'}</div>
+          <div class="tile-badge tb-w">✓ Done</div>
         </div>
-        <div class="ring-label">${cat}</div>
-        <div class="ring-pct">${pct}% Done</div>
-      </div>`;
-    }).join('');
+        <div style="font-size:18px;color:rgba(255,255,255,.6);">✓</div>
+      </div></div>`;
+    const cls = ppCount ? 't-urgent' : '';
+    const badge = ppCount
+      ? `<div class="tile-badge tb-r">⚠️ ${ppCount} Pet Peeve${ppCount>1?'s':''}</div>`
+      : `<div class="tile-badge" style="background:var(--bg);color:var(--ink3);">Tap to open</div>`;
+    return `<div class="ttile ${cls} fadein" onclick="openFdwDetail(${t.id})">
+      <div class="ttile-inner">
+        <div class="tile-icon ${CAT_COLORS[t.cat]||'ic-b'}">${t.emoji}</div>
+        <div class="tile-body">
+          <div class="tile-name">${t.name}</div>
+          ${badge}
+        </div>
+        <div style="font-size:22px;color:var(--ink3);">›</div>
+      </div></div>`;
   }
-  // Up next
-  const next = tasks.find(t=>!t.completed);
-  const nextEl = document.getElementById('fdw-home-next');
-  if (nextEl) {
-    if (!next) {
-      nextEl.innerHTML='<div style="padding:20px;text-align:center;"><div style="font-size:36px;">🎉</div><div style="font-size:14px;color:var(--ink3);margin-top:6px;">All tasks complete!</div></div>';
-    } else {
-      const pp=(next.petPeeves||[]).length;
-      nextEl.innerHTML=`<div class="ttile ${pp?'t-urgent':'t-pending'} fadein" style="margin:0;border-radius:0;box-shadow:none;" onclick="openFdwDetail(${next.id})">
-        <div class="ttile-inner">
-          <div class="tile-icon ${CAT_COLORS[next.cat]||'ic-b'}">${next.emoji}</div>
-          <div class="tile-body">
-            <div class="tile-name">${next.name}</div>
-            <div class="tile-sub">${next.time||'Scheduled'} · Tap to open</div>
-            ${pp?`<div class="tile-badge tb-r">⚠️ ${pp} Pet Peeve${pp>1?'s':''}</div>`:`<div class="tile-badge tb-b">View Details →</div>`}
-          </div>
-          <div style="font-size:22px;color:var(--ink3);">›</div>
-        </div></div>`;
-    }
-  }
-  // Activity
-  const af = document.getElementById('fdw-activity-feed');
-  const done = tasks.filter(t=>t.completed);
-  if(af) af.innerHTML = done.length
-    ? done.slice(0,3).map(t=>`<div class="act-item"><div class="act-dot" style="background:var(--green-l);color:var(--green);">✓</div><div class="act-body"><div class="act-title">${t.name}</div><div class="act-sub">Completed${t.completedAt?' at '+t.completedAt:''}</div></div></div>`).join('')
-    : '<div style="padding:16px;text-align:center;color:var(--ink3);font-size:13px;">No completed tasks yet</div>';
+
+  const morning   = todayTasks.filter(t=>{ const tm=parseTime(t.time); return !tm||tm<720; });
+  const afternoon = todayTasks.filter(t=>{ const tm=parseTime(t.time); return tm&&tm>=720&&tm<1080; });
+  const evening   = todayTasks.filter(t=>{ const tm=parseTime(t.time); return tm&&tm>=1080; });
+  let html='';
+  if(morning.length)   html+='<div class="sh">Morning</div>'+morning.map(fdwTaskTile).join('');
+  if(afternoon.length) html+='<div class="sh">Afternoon</div>'+afternoon.map(fdwTaskTile).join('');
+  if(evening.length)   html+='<div class="sh">Evening</div>'+evening.map(fdwTaskTile).join('');
+  if(!morning.length&&!afternoon.length&&!evening.length) html=todayTasks.map(fdwTaskTile).join('');
+  container.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════
-// HELPER SCHEDULE
+// HELPER SCHEDULE — calendar strip + day tasks (read-only)
 // ═══════════════════════════════════════════════════
+let fdwSelectedDay = null; // helper's selected day for schedule view
+
 function renderFdwSchedule() {
-  const container = document.getElementById('fdw-task-list');
-  if (!container) return;
-  const total = tasks.length;
-  const done  = tasks.filter(t=>t.completed).length;
-  const pct   = total ? Math.round((done/total)*100) : 0;
-  const pctEl = document.getElementById('fdw-pct-lbl');
-  const pbar  = document.getElementById('fdw-pbar');
-  if (pctEl) pctEl.textContent = pct+'%';
-  if (pbar)  {
-    pbar.style.width = pct+'%';
-    pbar.style.background = pct<30?'var(--red)':pct<70?'var(--amber)':'var(--green)';
+  const ws = currentWeekStart();
+  const wsDate = new Date(ws + 'T00:00:00');
+  const monthLabel = document.getElementById('fdw-week-month-label');
+  if (monthLabel) monthLabel.textContent = wsDate.toLocaleDateString('en-SG',{month:'long',year:'numeric'});
+  if (!fdwSelectedDay) fdwSelectedDay = todayDayKey();
+
+  const strip = document.getElementById('fdw-week-strip');
+  if (strip) {
+    strip.innerHTML = DAY_KEYS.map((dk, i) => {
+      const d = new Date(wsDate); d.setDate(d.getDate()+i);
+      const dayNum = d.getDate();
+      const hasTasks = tasks.some(t =>
+        t.recurDay===dk || (t.recurDays && t.recurDays.includes(dk))
+      );
+      const isToday = dk === todayDayKey();
+      const isActive = dk === fdwSelectedDay;
+      return `<div class="day-chip ${isActive?'active':''}" onclick="fdwSelectDay('${dk}')" data-day="${dk}">
+        <div class="day-label">${dk.toUpperCase()}</div>
+        <div class="day-num">${dayNum}</div>
+        ${(hasTasks||isToday) ? '<div class="day-dot"></div>' : '<div style="height:5px;"></div>'}
+      </div>`;
+    }).join('');
+    setTimeout(()=>{
+      const active = strip.querySelector('.day-chip.active');
+      if(active) active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    },100);
   }
+  renderFdwDayTasks();
+  // dummy — these IDs no longer exist but keep safe
 
   const now = new Date();
   const nowMin = now.getHours()*60+now.getMinutes();
@@ -2539,64 +2612,89 @@ function renderFdwSchedule() {
     return h*60+mn;
   }
 
-  // Group tasks
-  const morning   = tasks.filter(t => { const tm=parseTime(t.time); return !tm||tm<720; });
-  const afternoon = tasks.filter(t => { const tm=parseTime(t.time); return tm&&tm>=720&&tm<1080; });
-  const evening   = tasks.filter(t => { const tm=parseTime(t.time); return tm&&tm>=1080; });
+  // dummy placeholder (IDs removed)
+}
 
-  function taskTile(t) {
-    const tm = parseTime(t.time);
-    const isOverdue = !t.completed && tm && (nowMin-tm)>30;
-    const isActive  = !t.completed && tm && Math.abs(nowMin-tm)<=30;
-    const ppCount = (t.petPeeves||[]).length;
-    if (t.completed) return `<div class="ttile t-done fadein" onclick="openFdwDetail(${t.id})">
+function fdwSelectDay(dk) {
+  fdwSelectedDay = dk;
+  document.querySelectorAll('#fdw-week-strip .day-chip').forEach(c=>c.classList.toggle('active', c.dataset.day===dk));
+  renderFdwDayTasks();
+}
+
+function renderFdwDayTasks() {
+  const container = document.getElementById('fdw-sched-day-tasks');
+  if (!container) return;
+  const dk = fdwSelectedDay || todayDayKey();
+  const dayName = DAY_NAMES[DAY_KEYS.indexOf(dk)] || dk;
+  const isToday = dk === todayDayKey();
+
+  // Get tasks for this day
+  const dayTasks = tasks.filter(t =>
+    t.recurDay === dk ||
+    (t.recurDays && t.recurDays.includes(dk)) ||
+    (t.recur === 'daily')
+  );
+
+  // Also show meal for this day
+  const meal = weekPlan[dk];
+  const mealRecipe = meal ? cookbook.find(r=>r.id==meal.recipeId) : null;
+
+  let html = `<div style="padding:8px 16px 4px;font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;">${dayName}${isToday?' · Today':''} — ${dayTasks.length} task${dayTasks.length!==1?'s':''}</div>`;
+
+  if (!dayTasks.length && !mealRecipe) {
+    html += '<div style="padding:24px 16px;text-align:center;color:var(--ink3);font-size:13px;">No tasks assigned to this day.</div>';
+    container.innerHTML = html;
+    return;
+  }
+
+  function parseTime(ts) {
+    if (!ts) return null;
+    const m=ts.match(/(\d+):(\d+)\s*(AM|PM)/i); if(!m) return null;
+    let h=parseInt(m[1]); const mn=parseInt(m[2]); const ap=m[3].toUpperCase();
+    if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0; return h*60+mn;
+  }
+
+  dayTasks.forEach(t => {
+    const ppCount=(t.petPeeves||[]).length;
+    if (t.completed) {
+      html+=`<div class="ttile t-done fadein" onclick="openFdwDetail(${t.id})">
+        <div class="ttile-inner">
+          <div class="tile-icon ic-w">${t.emoji}</div>
+          <div class="tile-body">
+            <div class="tile-name w">${t.name}</div>
+            <div class="tile-sub w">${t.completedAt?'Done at '+t.completedAt:'Completed'}</div>
+            <div class="tile-badge tb-w">✓ Done</div>
+          </div>
+          <div style="font-size:18px;color:rgba(255,255,255,.6);">✓</div>
+        </div></div>`;
+    } else {
+      const badge = ppCount
+        ? `<div class="tile-badge tb-r">⚠️ ${ppCount} Pet Peeve${ppCount>1?'s':''}</div>`
+        : `<div class="tile-badge" style="background:var(--bg);color:var(--ink3);">Tap to open</div>`;
+      html+=`<div class="ttile ${ppCount?'t-urgent':''} fadein" onclick="openFdwDetail(${t.id})">
+        <div class="ttile-inner">
+          <div class="tile-icon ${CAT_COLORS[t.cat]||'ic-b'}">${t.emoji}</div>
+          <div class="tile-body">
+            <div class="tile-name">${t.name}</div>
+            ${badge}
+          </div>
+          <div style="font-size:22px;color:var(--ink3);">›</div>
+        </div></div>`;
+    }
+  });
+
+  if (mealRecipe) {
+    html+=`<div class="ttile fadein" style="border-left:4px solid var(--green);" onclick="openRecipeDetail(${mealRecipe.id})">
       <div class="ttile-inner">
-        <div class="tile-icon ic-w">${t.emoji}</div>
+        <div class="tile-icon ic-g">${mealRecipe.emoji}</div>
         <div class="tile-body">
-          <div class="tile-name w">${t.name}</div>
-          <div class="tile-sub w">${t.time||''} · Completed${t.completedAt?' at '+t.completedAt:''}</div>
-          <div class="tile-badge tb-w">✓ Done</div>
-        </div>
-        <div style="font-size:18px;color:rgba(255,255,255,.6);">✓</div>
-      </div></div>`;
-    const cls = isOverdue?'t-overdue':isActive?'t-active':ppCount?'t-urgent':'';
-    const badge = isOverdue
-      ? `<div class="tile-badge tb-a">⏰ OVERDUE</div>`
-      : isActive ? `<div class="tile-badge tb-b">● Now</div>`
-      : ppCount  ? `<div class="tile-badge tb-r">⚠️ ${ppCount} Pet Peeve${ppCount>1?'s':''}</div>`
-      : `<div class="tile-badge" style="background:var(--bg);color:var(--ink3);">Tap to open</div>`;
-    return `<div class="ttile ${cls} fadein" onclick="openFdwDetail(${t.id})">
-      <div class="ttile-inner">
-        <div class="tile-icon ${CAT_COLORS[t.cat]||'ic-b'}">${t.emoji}</div>
-        <div class="tile-body">
-          <div class="tile-name">${t.name}</div>
-          <div class="tile-sub">${t.time||'—'} · ${t.dur||''}</div>
-          ${badge}
+          <div class="tile-name">${mealRecipe.name}</div>
+          <div class="tile-sub">Dinner · ${meal.pax||4} pax · Tap to view recipe</div>
         </div>
         <div style="font-size:22px;color:var(--ink3);">›</div>
       </div></div>`;
   }
 
-  let html = '';
-  if (morning.length) {
-    html += `<div class="sh">Morning</div>`;
-    html += morning.map(taskTile).join('');
-  }
-  if (afternoon.length) {
-    html += `<div class="sh">Afternoon</div>`;
-    html += afternoon.map(taskTile).join('');
-  }
-  if (evening.length) {
-    html += `<div class="sh">Evening</div>`;
-    html += evening.map(taskTile).join('');
-  }
-  // Rest period notice
-  html += `<div style="margin:12px 16px;background:var(--bg);border-radius:var(--r);padding:20px;text-align:center;">
-    <div style="font-size:28px;margin-bottom:6px;">🌙</div>
-    <div style="font-size:14px;font-weight:700;color:var(--ink2);">Evening Rest Period</div>
-    <div style="font-size:12px;color:var(--ink3);margin-top:4px;">No tasks scheduled after 6:00 PM today.</div>
-  </div>`;
-  if (!tasks.length) html = '<div style="padding:40px 16px;text-align:center;color:var(--ink3);">No tasks scheduled today.</div>';
   container.innerHTML = html;
 }
 
